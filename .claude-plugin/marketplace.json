@@ -1,0 +1,16 @@
+{
+  "name": "megaphone",
+  "description": "Megaphone — local-first launch-orchestration plugin for Claude Code.",
+  "owner": { "name": "Fernando Leyra" },
+  "plugins": [
+    {
+      "name": "megaphone",
+      "description": "Local-first launch-orchestration toolkit for vibe coders.",
+      "source": {
+        "source": "github",
+        "repo": "fernandoleyra/Megaphone",
+        "path": "."
+      }
+    }
+  ]
+}
