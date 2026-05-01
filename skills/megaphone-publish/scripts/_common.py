@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import os
-import stat
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -19,7 +18,6 @@ from typing import Any, Optional
 # ---------------------------------------------------------------------------
 
 CRED_DIR = Path(os.path.expanduser("~/.megaphone/credentials"))
-USER_STATE_DIR = Path(os.path.expanduser("~/.megaphone"))
 
 
 def repo_megaphone_dir() -> Path:
@@ -35,8 +33,9 @@ def published_log_path(date: str) -> Path:
 
 # ---------------------------------------------------------------------------
 # Credential vault — JSON files at ~/.megaphone/credentials/<platform>.json,
-# chmod 0600. Not encrypted; this matches what gh/aws/etc. ship by default
-# and avoids forcing a passphrase on the user. v2 may add OS-keychain.
+# created with mode 0600 from the start (no readable window). Not encrypted;
+# this matches what gh/aws/etc. ship by default and avoids forcing a
+# passphrase on the user.
 # ---------------------------------------------------------------------------
 
 def _ensure_secure_dir(d: Path) -> None:
@@ -63,8 +62,28 @@ def load_credentials(platform: str) -> Optional[dict]:
 
 
 def save_credentials(platform: str, data: dict) -> None:
+    """Atomically write credentials with 0600 perms from creation.
+
+    Writes via a temp file in the same directory, then renames into place.
+    This avoids the brief world-readable window that `write_text` followed by
+    `chmod` creates."""
     p = cred_path(platform)
-    p.write_text(json.dumps(data, indent=2))
+    tmp = p.with_suffix(p.suffix + ".tmp")
+    payload = json.dumps(data, indent=2).encode("utf-8")
+    flags = os.O_WRONLY | os.O_CREAT | os.O_TRUNC
+    if hasattr(os, "O_NOFOLLOW"):
+        flags |= os.O_NOFOLLOW
+    fd = os.open(str(tmp), flags, 0o600)
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(payload)
+    except Exception:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
+        raise
+    os.replace(str(tmp), str(p))
     try:
         p.chmod(0o600)
     except (OSError, PermissionError):

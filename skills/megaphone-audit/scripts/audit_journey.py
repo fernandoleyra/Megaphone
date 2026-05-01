@@ -188,7 +188,7 @@ def recent_activity(repo: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Landing fetch (lightweight; full audit lives in megaphone-landing-audit)
+# Landing fetch (lightweight; the full landing audit lives in audit_landing.py)
 # ---------------------------------------------------------------------------
 
 def fetch_landing(target: str) -> dict:
@@ -196,7 +196,7 @@ def fetch_landing(target: str) -> dict:
         return {"available": False}
     try:
         if target.startswith("http"):
-            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-journey-audit/0.4"})
+            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-audit/0.6"})
             with urllib.request.urlopen(req, timeout=15) as r:
                 body = r.read().decode("utf-8", errors="replace")
         else:
@@ -344,7 +344,7 @@ def main() -> None:
     total = sum(stage_scores.values())
     report = {
         "ok": True,
-        "audited_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "audited_at": _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "repo": str(repo),
         "landing_target": args.landing,
         "stages": {

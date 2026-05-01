@@ -164,6 +164,6 @@ The runner respects all of this and produces a frame-by-frame recording.
 ## How this fits with other megaphone skills
 
 - `megaphone-assets` — when the user asks for visual assets, the assets skill suggests both a banner image (NanoBanana / ChatGPT) AND a demo GIF (this skill). They're complementary: the banner says what the project IS; the GIF shows what it DOES.
-- `megaphone-landing-audit` — flags missing demo GIFs as a "trust signals" gap; suggests running `/megaphone-demo` to fill it.
+- `megaphone-audit` — flags missing demo GIFs as a "trust signals" gap; suggests running `/megaphone-demo` to fill it.
 - `megaphone-post` — when drafting a build-in-public post about a feature, can reference the GIF if it exists; for X / Bluesky posts the GIF is the engagement multiplier.
 - `megaphone-publish` — if a draft includes a demo file path, includes it as media on platforms that support it (planned for v0.6).

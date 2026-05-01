@@ -12,8 +12,6 @@ Most indie projects don't fail because they're bad. They fail because nobody hea
 3. **Draft the asks** — submission packets per venue, personalized DMs per amplifier
 4. **Plan the timing** — 30/14/6/0-day launch plan that orchestrates all of the above
 
-This skill consolidates what used to live across `megaphone-launch` and `megaphone-discover`, and adds the amplifier outreach layer that didn't exist before.
-
 ## Workflow — pick a phase or run them in order
 
 The skill has four phases. The user usually wants one phase at a time; ask which:

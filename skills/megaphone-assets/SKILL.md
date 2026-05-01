@@ -167,7 +167,7 @@ Distribution toolkit for vibe coders who hate self-promo.
 
 ### 5. Show the user a quick summary
 
-After writing, list the files created and call out the one or two assets you'd start with. Don't paste all of the copy back — they can read the files. Offer one concrete next move (`megaphone-launch` if no launch plan exists yet, otherwise `megaphone-post`).
+After writing, list the files created and call out the one or two assets you'd start with. Don't paste all of the copy back — they can read the files. Offer one concrete next move (`megaphone-outreach` if no launch plan exists yet, otherwise `megaphone-post`).
 
 ## Quality bar — read before generating
 

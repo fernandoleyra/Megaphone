@@ -27,6 +27,7 @@ if _HERE not in sys.path:
     sys.path.insert(0, _HERE)
 
 from _common import (  # noqa: E402
+    cred_path,
     delete_credentials,
     emit,
     fail,
@@ -35,7 +36,7 @@ from _common import (  # noqa: E402
     save_credentials,
 )
 
-SUPPORTED = ["bluesky", "devto", "linkedin", "reddit", "mastodon", "x", "hashnode"]
+SUPPORTED = ("bluesky", "devto", "linkedin", "reddit", "mastodon", "x", "hashnode")
 
 
 def cmd_status(args: argparse.Namespace) -> None:
@@ -73,13 +74,7 @@ def cmd_connect(args: argparse.Namespace) -> None:
     if not isinstance(creds, dict) or not creds:
         fail(f"{platform}.connect() returned no credentials.")
     save_credentials(platform, creds)
-    emit({"platform": platform, "connected": True, "credential_path": str(load_credentials_path(platform))})
-
-
-def load_credentials_path(platform: str) -> str:
-    from _common import cred_path
-
-    return cred_path(platform)
+    emit({"platform": platform, "connected": True, "credential_path": str(cred_path(platform))})
 
 
 def cmd_disconnect(args: argparse.Namespace) -> None:
@@ -94,15 +89,15 @@ def main() -> None:
     sub = p.add_subparsers(dest="cmd", required=True)
 
     s = sub.add_parser("status")
-    s.add_argument("platform", nargs="?")
+    s.add_argument("platform", nargs="?", choices=SUPPORTED)
     s.set_defaults(func=cmd_status)
 
     c = sub.add_parser("connect")
-    c.add_argument("platform")
+    c.add_argument("platform", choices=SUPPORTED)
     c.set_defaults(func=cmd_connect)
 
     d = sub.add_parser("disconnect")
-    d.add_argument("platform")
+    d.add_argument("platform", choices=SUPPORTED)
     d.set_defaults(func=cmd_disconnect)
 
     args = p.parse_args()

@@ -35,8 +35,14 @@ from _common import (  # noqa: E402
     save_credentials,
 )
 
+SUPPORTED_PLATFORMS = ("bluesky", "devto", "linkedin", "reddit", "mastodon", "x", "hashnode")
+
 
 def _load_connector(platform: str):
+    if platform not in SUPPORTED_PLATFORMS:
+        fail(
+            f"Unknown platform '{platform}'. Supported: {', '.join(SUPPORTED_PLATFORMS)}",
+        )
     try:
         return importlib.import_module(f"connectors.{platform}")
     except ImportError as e:
@@ -49,7 +55,12 @@ def _today() -> str:
 
 def main() -> None:
     p = argparse.ArgumentParser(description="Publish a megaphone draft to a platform")
-    p.add_argument("--platform", required=True, help="bluesky | linkedin | devto | reddit | mastodon | x | hashnode")
+    p.add_argument(
+        "--platform",
+        required=True,
+        choices=SUPPORTED_PLATFORMS,
+        help="bluesky | linkedin | devto | reddit | mastodon | x | hashnode",
+    )
     p.add_argument("--file", required=True, help="Path to the draft .md file")
     p.add_argument("--dry-run", action="store_true", help="Build the payload but don't post")
     p.add_argument("--no-retry", action="store_true", help="Disable refresh-token + rate-limit retries")
@@ -115,7 +126,7 @@ def main() -> None:
     log_entry = {
         "platform": args.platform,
         "file": args.file,
-        "published_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "published_at": _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         **result.to_dict(),
     }
     log_path = published_log_path(_today())

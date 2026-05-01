@@ -1,17 +1,20 @@
 {
   "name": "megaphone",
-  "version": "0.6.1",
-  "description": "Local-first launch-orchestration toolkit for vibe coders. Nine focused skills - init the project profile, generate copy/banner/demo assets, draft community-aware posts (Reddit per-sub, Show HN, Indie Hackers, Peerlist, Hashnode + feed platforms), run outreach (venues, amplifiers, personalized DMs, 30/14/6/0-day launch plan), publish locally to 7 platforms, schedule one-offs/cadences/launch sequences, audit the landing page and user journey, and track traction. No SaaS in the middle.",
+  "version": "0.6.2",
+  "description": "The 30-day distribution system for vibe coders. Nine focused Claude Code skills take a project from 'I shipped a thing' to launch with stars on GitHub: profile the project, generate copy/banner/demo, draft community-aware posts (Reddit per-sub, Show HN, Indie Hackers, Peerlist, Hashnode + feed platforms), run outreach (venues, amplifiers, personalised DMs, 30/14/6/0-day plan), publish locally to 7 platforms, schedule one-offs/cadences/launch sequences, audit landing + user journey, and track traction. Local-first; OAuth tokens never leave your machine.",
   "author": {
     "name": "Fernando"
   },
   "keywords": [
-    "marketing",
+    "vibe-coding",
+    "indie-hacker",
+    "github-stars",
     "launch",
     "distribution",
+    "marketing",
     "build-in-public",
-    "indie-hacker",
-    "vibe-coding",
-    "github-stars"
+    "product-hunt",
+    "show-hn",
+    "30-day-launch"
   ]
 }

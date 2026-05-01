@@ -44,6 +44,8 @@ import _when  # noqa: E402
 PLUGIN_ROOT_HINT = os.environ.get("CLAUDE_PLUGIN_ROOT") or os.path.dirname(os.path.dirname(_HERE))
 PUBLISH_SCRIPT = Path(PLUGIN_ROOT_HINT) / "skills" / "megaphone-publish" / "scripts" / "publish.py"
 
+SUPPORTED_PLATFORMS = ("bluesky", "devto", "linkedin", "reddit", "mastodon", "x", "hashnode")
+
 
 # ---------------------------------------------------------------------------
 # Storage
@@ -203,12 +205,15 @@ def cmd_add_sequence(args) -> None:
     items_added = []
     queue = _read_json(queue_path(args.cwd), [])
     for entry in spec["items"]:
+        platform = entry["platform"]
+        if platform not in SUPPORTED_PLATFORMS:
+            sys.exit(f"ERROR: sequence item references unsupported platform '{platform}'.")
         h, _, mm = entry["offset"].partition(":")
         offset = _dt.timedelta(hours=int(h), minutes=int(mm or 0))
         when = _dt.datetime.combine(anchor, _dt.time(0, 0), tzinfo=_now().tzinfo) + offset
         item = {
             "id": _new_id(),
-            "platform": entry["platform"],
+            "platform": platform,
             "file": entry["file"],
             "at": when.isoformat(),
             "status": "pending",
@@ -472,11 +477,13 @@ def _invoke_publish(platform: str, file: str) -> dict:
 
     The publish script prints one JSON line on stdout (the publish record).
     We capture and parse it; on parse failure, treat as unknown error."""
+    if platform not in SUPPORTED_PLATFORMS:
+        return {"ok": False, "error_type": "unknown", "error_message": f"unsupported platform '{platform}'"}
     if not PUBLISH_SCRIPT.exists():
         return {"ok": False, "error_type": "unknown", "error_message": f"publish.py not found at {PUBLISH_SCRIPT}"}
     try:
         proc = subprocess.run(
-            ["python3", str(PUBLISH_SCRIPT), "--platform", platform, "--file", file],
+            [sys.executable, str(PUBLISH_SCRIPT), "--platform", platform, "--file", file],
             capture_output=True, text=True, timeout=120,
         )
     except subprocess.TimeoutExpired:
@@ -514,7 +521,7 @@ def main() -> None:
     sub.add_parser("init").set_defaults(func=cmd_init)
 
     a = sub.add_parser("add")
-    a.add_argument("--platform", required=True)
+    a.add_argument("--platform", required=True, choices=SUPPORTED_PLATFORMS)
     a.add_argument("--file", required=True)
     a.add_argument("--at", required=True, help="ISO timestamp or natural ('tomorrow 10am')")
     a.add_argument("--source", default="manual")
@@ -523,7 +530,7 @@ def main() -> None:
     ac = sub.add_parser("add-cadence")
     ac.add_argument("--cron", required=True)
     ac.add_argument("--folder", required=True)
-    ac.add_argument("--platform", required=True)
+    ac.add_argument("--platform", required=True, choices=SUPPORTED_PLATFORMS)
     ac.add_argument("--label")
     ac.set_defaults(func=cmd_add_cadence)
 

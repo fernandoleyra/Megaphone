@@ -166,7 +166,7 @@ def cmd_venues(args) -> None:
 
     out = {
         "ok": True,
-        "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "audience_primary": aud_primary,
         "audience_niches": aud_niches,
         "seed_venues": venues_out,
@@ -206,7 +206,7 @@ def cmd_amplifiers(args) -> None:
 
     out = {
         "ok": True,
-        "generated_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "generated_at": _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "project": project_name,
         "audience": aud_primary,
         "niches": niches,

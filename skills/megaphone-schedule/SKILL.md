@@ -91,7 +91,7 @@ To stop generating new files for a cadence: drop new drafts into the folder. To 
 python3 schedule.py add-sequence --file .megaphone/launch/sequence.json
 ```
 
-Sequence file format (this is the format `megaphone-launch` writes when the user finishes the launch plan):
+Sequence file format (this is the format `megaphone-outreach` writes when the user finishes the launch plan):
 ```json
 {
   "name": "v1-launch-2026-05-15",

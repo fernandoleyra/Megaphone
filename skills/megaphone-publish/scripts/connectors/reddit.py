@@ -20,7 +20,7 @@ from typing import Optional
 
 from connectors._base import PostResult
 from _http import HttpError, post_form
-from _oauth_redirect import capture_oauth_code, redirect_uri
+from _oauth_redirect import capture_oauth_code, new_state, redirect_uri
 
 AUTH_URL = "https://www.reddit.com/api/v1/authorize"
 TOKEN_URL = "https://www.reddit.com/api/v1/access_token"
@@ -140,7 +140,7 @@ def connect(prompt) -> dict:
     if not client_id or not client_secret:
         raise RuntimeError("client_id and client_secret are required.")
 
-    state = "megaphone"
+    state = new_state()
     auth_qs = urllib.parse.urlencode(
         {
             "client_id": client_id,
@@ -153,7 +153,7 @@ def connect(prompt) -> dict:
     )
     print()
     print("Opening Reddit authorize page in your browser…")
-    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}")
+    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}", expected_state=state)
     if not params or "code" not in params:
         raise RuntimeError("Did not receive an OAuth code from Reddit.")
 

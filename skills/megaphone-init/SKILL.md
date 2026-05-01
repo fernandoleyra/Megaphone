@@ -7,7 +7,7 @@ description: Initialize the Megaphone distribution toolkit for a repo. Use this 
 
 The user has a project but doesn't know how to distribute it. This skill produces the artifact every other megaphone skill depends on: a project profile that captures what the project is, who it's for, and how the user wants to sound — saved to `.megaphone/profile.json` so it persists across sessions.
 
-The profile is small but high-leverage. Every later skill (`megaphone-assets`, `megaphone-launch`, `megaphone-post`, `megaphone-discover`, `megaphone-digest`) reads from it. A bad profile produces generic, AI-sounding output. A good one — especially the voice samples — produces drafts the user actually wants to ship.
+The profile is small but high-leverage. Every later skill (`megaphone-assets`, `megaphone-outreach`, `megaphone-post`, `megaphone-publish`, `megaphone-digest`) reads from it. A bad profile produces generic, AI-sounding output. A good one — especially the voice samples — produces drafts the user actually wants to ship.
 
 ## Workflow
 
@@ -86,7 +86,7 @@ Add `.megaphone/metrics/` to `.gitignore` if a `.gitignore` exists — metrics a
 Don't dump the full menu of skills on the user. Pick the single highest-value next move based on what they said:
 
 - If they want to ship soon → "Want me to draft launch assets next? (`/megaphone-assets`)"
-- If they want stars → "Want me to find awesome-lists where this belongs? (`/megaphone-discover`)"
+- If they want stars → "Want me to find awesome-lists and amplifiers where this belongs? (`/megaphone-outreach`)"
 - If they're early and unsure → "Want a quick set of marketing assets so the README and socials don't look empty? (`/megaphone-assets`)"
 
 Keep the suggestion to one line. End the turn.

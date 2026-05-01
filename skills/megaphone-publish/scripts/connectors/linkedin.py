@@ -26,7 +26,7 @@ from typing import Optional
 
 from connectors._base import PostResult
 from _http import HttpError, get_json, post_form, post_json
-from _oauth_redirect import capture_oauth_code, redirect_uri
+from _oauth_redirect import capture_oauth_code, new_state, redirect_uri
 
 AUTH_URL = "https://www.linkedin.com/oauth/v2/authorization"
 TOKEN_URL = "https://www.linkedin.com/oauth/v2/accessToken"
@@ -135,7 +135,7 @@ def connect(prompt) -> dict:
     if not client_id or not client_secret:
         raise RuntimeError("client_id and client_secret are required.")
 
-    state = "megaphone"
+    state = new_state()
     auth_qs = urllib.parse.urlencode(
         {
             "response_type": "code",
@@ -147,7 +147,7 @@ def connect(prompt) -> dict:
     )
     print()
     print("Opening LinkedIn authorize page in your browser…")
-    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}")
+    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}", expected_state=state)
     if not params or "code" not in params:
         raise RuntimeError("Did not receive an OAuth code from LinkedIn.")
 

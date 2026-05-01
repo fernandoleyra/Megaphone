@@ -201,7 +201,7 @@ def load_target(target: str) -> tuple[str, dict]:
     """Return (html, meta) where meta has page_bytes, is_https, fetch_error."""
     if target.startswith("http://") or target.startswith("https://"):
         try:
-            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-landing-audit/0.4"})
+            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-audit/0.6"})
             with urllib.request.urlopen(req, timeout=20) as resp:
                 body = resp.read()
             return body.decode("utf-8", errors="replace"), {
@@ -467,7 +467,7 @@ def main() -> None:
     report = {
         "ok": True,
         "target": args.target,
-        "audited_at": _dt.datetime.utcnow().isoformat() + "Z",
+        "audited_at": _dt.datetime.now(_dt.timezone.utc).isoformat().replace("+00:00", "Z"),
         "page": {
             "title": f.title,
             "description": f.description,
