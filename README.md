@@ -1,116 +1,120 @@
-# Megaphone
+<p align="center">
+  <img src="assets/banner.png" alt="Megaphone — launch-orchestration plugin for Claude Code" />
+</p>
 
-The launch-orchestration plugin for indie / vibe coders. Plans the 30-day ramp, drafts every channel's submission packet (with per-community cultural awareness), pushes posts live to your accounts — fully local, no SaaS in the middle.
+<h1 align="center">Megaphone</h1>
 
-You built the thing. Megaphone helps the world find it.
+<p align="center">
+  <b>The launch-orchestration plugin for indie & vibe coders.</b><br/>
+  Plans your launch, drafts every channel, publishes to your accounts — fully local, no SaaS in the middle.
+</p>
 
-## Nine focused skills
+<p align="center">
+  <a href="https://github.com/fernandoleyra/Megaphone/stargazers"><img src="https://img.shields.io/github/stars/fernandoleyra/Megaphone?style=flat-square" alt="Stars"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License"></a>
+  <img src="https://img.shields.io/badge/Claude%20Code-Plugin-8B5CF6?style=flat-square" alt="Claude Code Plugin">
+  <img src="https://img.shields.io/badge/version-0.6.1-orange?style=flat-square" alt="Version">
+</p>
 
-In v0.6 we compacted from 11 skills to 9 by merging launch + discover into **outreach**, and the two audits into **audit**. The focus tightened: communication outreach and community-aware post preparation are now first-class.
+---
 
-| Skill | Triggers when you say… | What you get |
-|---|---|---|
-| `megaphone-init` | "set up megaphone", "init megaphone for this repo" | A `.megaphone/profile.json` capturing what your project is, who it's for, and how you sound |
-| `megaphone-assets` | "generate marketing assets", "rewrite my README", "I need a banner" | One-liner, hook, README hero, dev.to intro, landing copy. Crafts banner-image prompts and asks whether to render with **NanoBanana** (Gemini 2.5 Flash Image) or **ChatGPT** (DALL·E). Hands off to `megaphone-demo` for the GIF. |
-| `megaphone-demo` | "make a demo gif", "record a demo", "screencast for my README" | Walks the deployed app through a 3–7 step happy path with Playwright, exports a GIF/MP4 to `.megaphone/assets/demo/`. Config-driven so the demo regenerates when the UI changes. |
-| `megaphone-post` | "draft a build-in-public post", "draft a Reddit post for r/SideProject", "write a Show HN", "post on Indie Hackers", "draft for dev.to" | **Community-aware drafting.** Feed platforms (Bluesky, X, LinkedIn, Threads, Mastodon, dev.to) AND community platforms (Reddit per-subreddit, Hacker News Show HN, Indie Hackers, Peerlist, Hashnode). Reads the venue's culture before writing. |
-| `megaphone-outreach` | "plan my launch", "where should I submit", "find awesome-lists", "who should I reach out to", "draft a DM to <person>", "30-day launch plan" | Four phases: (1) score venues, (2) find amplifiers, (3) draft personalized DMs + submission packets, (4) build the dated 30/14/6/0-day launch plan. |
-| `megaphone-publish` | "publish my drafts", "post to bluesky", "ship the launch posts" | Drafts go live on the actual platform — Bluesky, LinkedIn, dev.to, Reddit, Mastodon, X, Hashnode. Fully local OAuth; tokens never leave your machine. |
-| `megaphone-schedule` | "schedule this for tuesday 10am", "every friday post from this folder", "set up the launch sequence" | One-offs, recurring cadences (folder-rotation), coordinated launch-day sequences. Hooks into `anthropic-skills:schedule`. |
-| `megaphone-audit` | "audit my landing page", "audit my user journey", "pre-launch audit", "where do users drop off" | Both audits in one skill. Landing: 100-pt rubric. Journey: 70-pt + three-persona walkthrough naming the activation moment. |
-| `megaphone-digest` | "weekly digest", "how's my project doing" | Stars delta, posts published this week, top performers, next best action. |
+You built the thing. **Megaphone helps the world find it.**
 
-## Why it's different from the competition
+It scans your repo, drafts community-aware posts (Reddit per-subreddit, Show HN, Indie Hackers, Peerlist, Hashnode + the usual feed platforms), runs outreach to venues and amplifiers, publishes the drafts to live platforms, schedules launch sequences, audits your landing page, and tracks traction — all from inside Claude Code.
 
-| | Megaphone | Upload-Post | Postiz | Buffer / Hootsuite / Later |
-|---|---|---|---|---|
-| Where your OAuth tokens live | `~/.megaphone/credentials/` (your machine) | Their backend | Postiz DB | Their dashboard |
-| Subscription | None | $0 / 10 uploads/mo | Free OSS, paid cloud | $6–$120+/mo |
-| Repo-aware | Yes | No | No | No |
-| Community-platform drafting (Reddit per-sub, Show HN, IH, Peerlist) | First-class | None | Limited | None |
-| Launch sequences (cross-platform timeline) | First-class | × | × | × |
-| Cadences pull from a folder | Yes | × | One post repeat | × |
-| Amplifier discovery + personalized DMs | Yes | × | × | × |
-| Landing + journey audit | Yes | × | × | × |
-| Posts to | Bluesky, LinkedIn, dev.to, Reddit, Mastodon, X, Hashnode | 10 platforms incl. TikTok / IG / YouTube | 30+ platforms | 6–28+ platforms |
-
-The trade-off we make: we don't try to do TikTok, Instagram, YouTube. Their auth and content rules add a lot of friction. Postiz and Upload-Post are still better for those. **Megaphone is better for launching and growing a software project** — which is what indie devs are actually doing.
-
-## How it's designed
-
-- **Human-in-the-loop by default.** Every post is drafted to a file you can edit before `megaphone-publish` puts it live. Outreach drafts are never auto-sent.
-- **Repo-aware.** Skills read your repo: README, manifest files, recent commits, deployed URL, voice samples. The more you commit, the better the posts.
-- **Persistent.** Per-project state lives in `.megaphone/` inside your project. User-wide credentials live in `~/.megaphone/credentials/` (chmod 0600). Both survive across Claude Code sessions.
-- **Stdlib-only Python.** No `pip install` step for the core. Demo GIFs require Playwright + ffmpeg (one-time install).
-- **Honest about platform rules.** Hacker News submissions, awesome-list PRs, X auto-replies, Reddit promotional rules — the plugin says what's automatable and what isn't, plainly.
+Your OAuth tokens stay on your machine. No backend. No subscription.
 
 ## Install
 
-```bash
-# In Claude Code
-/plugin install <path-to-megaphone.plugin>
+In Claude Code, run two commands:
+
+```
+/plugin marketplace add fernandoleyra/megaphone
+/plugin install megaphone@megaphone
 ```
 
-Or drop the plugin folder into your `.claude/plugins/` directory.
+That's it. The plugin loads its 9 skills into your session. Type `/plugin list` to confirm.
+
+## What you get — 9 skills
+
+| Skill | Trigger phrases | What it does |
+|---|---|---|
+| `megaphone-init` | "set up megaphone", "init megaphone for this repo" | Scans your repo and writes `.megaphone/profile.json` capturing what your project is, who it's for, and how you sound. |
+| `megaphone-assets` | "generate marketing assets", "rewrite my README", "I need a banner" | One-liner, hook, README hero, dev.to intro, landing copy. Crafts banner-image prompts (NanoBanana / DALL·E). |
+| `megaphone-demo` | "make a demo gif", "record a demo" | Walks your deployed app through a 3–7 step happy path with Playwright, exports a GIF/MP4. |
+| `megaphone-post` | "draft a Show HN", "draft a Reddit r/SideProject post", "post on Indie Hackers" | **Community-aware drafting.** Reads each venue's culture before writing — Reddit per-sub, HN, IH, Peerlist, Hashnode + Bluesky, X, LinkedIn, Threads, Mastodon, dev.to. |
+| `megaphone-outreach` | "plan my launch", "find awesome-lists", "draft a DM to <person>" | Four phases: score venues → find amplifiers → draft personalized DMs + submission packets → build the 30/14/6/0-day launch plan. |
+| `megaphone-publish` | "publish my drafts", "post to bluesky", "ship the launch posts" | Drafts go live on the actual platform — Bluesky, LinkedIn, dev.to, Reddit, Mastodon, X, Hashnode. Local OAuth, tokens never leave your machine. |
+| `megaphone-schedule` | "schedule this for tuesday 10am", "set up the launch sequence" | One-offs, recurring cadences from a folder, coordinated launch-day sequences. |
+| `megaphone-audit` | "audit my landing page", "audit my user journey", "pre-launch audit" | Landing page (100-pt rubric) + journey audit (70-pt + three-persona walkthrough). Names the activation moment and ranks blockers. |
+| `megaphone-digest` | "weekly digest", "how's my project doing" | Stars delta, posts published, top performers, next best action. |
+
+## Why it's different
+
+| | Megaphone | Upload-Post | Postiz | Buffer / Hootsuite |
+|---|---|---|---|---|
+| Where your tokens live | **Your machine** | Their backend | Their DB | Their dashboard |
+| Subscription | **None** | $0 / 10 uploads/mo | Freemium | $6–$120+/mo |
+| Repo-aware drafting | ✅ | ❌ | ❌ | ❌ |
+| Community-platform drafting (Reddit per-sub, HN, IH) | **First-class** | ❌ | Limited | ❌ |
+| Cross-platform launch sequences | ✅ | ❌ | ❌ | ❌ |
+| Amplifier discovery + personalized DMs | ✅ | ❌ | ❌ | ❌ |
+| Landing + journey audits | ✅ | ❌ | ❌ | ❌ |
+
+The trade-off: we don't do TikTok / Instagram / YouTube. **Megaphone is built for launching software** — which is what indie devs actually need.
+
+## Design principles
+
+- **Human-in-the-loop by default.** Every post is drafted to a file you can edit before publishing. Outreach DMs are never auto-sent.
+- **Repo-aware.** Skills read your README, manifests, recent commits, deployed URL, voice samples. The more you commit, the better the posts.
+- **Persistent.** Per-project state in `.megaphone/`, user-wide credentials in `~/.megaphone/credentials/` (chmod 0600). Survives across sessions.
+- **Stdlib-only Python.** No `pip install` for the core. Demo GIFs need Playwright + ffmpeg (one-time).
+- **Honest about platform rules.** HN, awesome-lists, Reddit promo rules, X auto-replies — Megaphone says plainly what's automatable and what isn't.
 
 ## Typical first session
 
 ```
 You: I just built a thing. Help me ship it.
-Claude: [megaphone-init triggers] → scans repo, asks 3 short questions, writes .megaphone/profile.json
+Claude: [megaphone-init] → scans repo, writes .megaphone/profile.json
 
-You: ok, generate the assets
-Claude: [megaphone-assets triggers] → asks "banner via NanoBanana or ChatGPT?",
-        crafts the image prompt, suggests demo GIF via megaphone-demo,
-        writes hook + README hero + dev.to intro
+You: generate the assets
+Claude: [megaphone-assets] → banner prompt + hook + README hero + dev.to intro
 
 You: where should I submit and who should I DM?
-Claude: [megaphone-outreach triggers] → scores 15 venues, finds 10 amplifiers,
-        drafts per-venue submission packets and per-amplifier personalized DMs
+Claude: [megaphone-outreach] → 15 venues scored, 10 amplifiers, personalized packets
 
-You: draft a Show HN and a Reddit r/SideProject post about what I shipped
-Claude: [megaphone-post triggers] → reads community-drafting.md for HN posture
-        and r/SideProject culture, generates two appropriate drafts
+You: draft a Show HN and an r/SideProject post
+Claude: [megaphone-post] → reads HN posture and r/SideProject culture, drafts both
 
-You: ok, publish the Bluesky one and schedule LinkedIn for Tuesday 10am
-Claude: [megaphone-publish + megaphone-schedule trigger]
+You: publish the Bluesky one, schedule LinkedIn for Tuesday 10am
+Claude: [megaphone-publish + megaphone-schedule]
 
 You: pre-launch audit
-Claude: [megaphone-audit triggers] → runs landing audit + journey audit,
-        names activation moment, ranks blockers
+Claude: [megaphone-audit] → landing rubric + journey walkthrough + activation moment
 ```
 
-## Setting up publish auth
+## Requirements
 
-First-time auth is needed once per platform. Times below are first-time setup.
+- **Claude Code** (latest)
+- **Python 3.10+** (stdlib only — no pip install for the core)
+- **Optional:** Playwright + ffmpeg (only if you use `megaphone-demo` for GIFs)
 
-| Platform | Auth | Time |
-|---|---|---|
-| Bluesky | App password | ~30 sec |
-| dev.to | API key | ~30 sec |
-| Mastodon | Per-instance access token | ~1 min |
-| Hashnode | Personal access token | ~1 min |
-| LinkedIn | Register an OAuth app, then connect | ~5 min |
-| Reddit | Register an OAuth app, then connect | ~5 min |
-| X | Register an OAuth app + paid API | ~5 min |
+## ⭐ Star this repo
 
-See `skills/megaphone-publish/references/auth-setup.md` for step-by-step.
+If Megaphone helps you launch something, **please star the repo**. Stars are the single biggest signal that keeps this project alive and free for everyone. It costs you one click — and it helps another indie dev find it.
 
-## What's NOT in the plugin
+[**→ Star Megaphone on GitHub**](https://github.com/fernandoleyra/Megaphone)
 
-- Hacker News submission (HN is human-only by policy)
-- Awesome-list PR auto-submission (maintainers reject these)
-- Auto-DMs to amplifiers (against most platforms' ToS)
-- TikTok / Instagram / Threads / YouTube (Meta OAuth and content rules; out of scope)
-- Image / video generation (skill writes the prompt; you generate via NanoBanana or ChatGPT)
+## Acknowledgments
 
-## Roadmap
+Megaphone stands on the shoulders of:
 
-- v0.7: Engagement annotation in `.megaphone/published/` (so `suggest-time` switches to user's own data automatically; `digest` shows top-performing posts)
-- v0.7: AI-assistant citation optimization pass (helps your README and dev.to posts get cited by ChatGPT/Claude/Perplexity)
-- v0.8: Comment-reply drafting (the user's own posts on Reddit / dev.to / IH after they go live)
-- v0.8: Newsletter pitch templates with editor-specific personalization
+- [**Anthropic Claude Code**](https://github.com/anthropics/claude-code) — the platform that made plugins like this possible.
+- [**Anthropic official skills**](https://github.com/anthropics/skills) — reference patterns for the skills format.
+- [**obra/superpowers**](https://github.com/obra/superpowers) — for showing what a great Claude Code plugin looks like end-to-end.
+
+If you build something on top of Megaphone, ping me — I'd love to see it.
 
 ## License
 
-MIT
+[MIT](LICENSE) © 2026 Fernando Leyra. Free to use, fork, modify, and redistribute.
