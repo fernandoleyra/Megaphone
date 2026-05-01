@@ -30,7 +30,7 @@ In Claude Code, run two commands:
 
 ```
 /plugin marketplace add fernandoleyra/megaphone
-/plugin install megaphone@megaphone
+/plugin install megaphone
 ```
 
 That's it. The plugin loads its 9 skills into your session. Type `/plugin list` to confirm.
