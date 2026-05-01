@@ -1,0 +1,48 @@
+{
+  "_comment": "Launch sequence template. Save as .megaphone/launch/sequence.json (or anywhere) and import with: python3 schedule.py add-sequence --file <path>. anchor_date is the launch day; offset is hours:minutes added to that day's 00:00 in the chosen timezone. Edit the items list to match the platforms you've drafted for and the order you want them to fire.",
+  "name": "v1-launch-2026-05-15",
+  "anchor_date": "2026-05-15",
+  "timezone": "America/Los_Angeles",
+  "items": [
+    {
+      "file": ".megaphone/launch/bluesky-launch.md",
+      "platform": "bluesky",
+      "offset": "06:00",
+      "_note": "earliest — Bluesky's tech audience is online by 6am PT"
+    },
+    {
+      "file": ".megaphone/launch/x-launch.md",
+      "platform": "x",
+      "offset": "06:30",
+      "_note": "30 min after Bluesky to avoid identical-twin look in feed sources"
+    },
+    {
+      "file": ".megaphone/launch/linkedin-launch.md",
+      "platform": "linkedin",
+      "offset": "07:00",
+      "_note": "10am ET — LinkedIn's strongest morning slot"
+    },
+    {
+      "file": ".megaphone/launch/devto-launch.md",
+      "platform": "devto",
+      "offset": "07:30",
+      "_note": "right after the LinkedIn drop catches the morning dev.to feed cycle"
+    },
+    {
+      "file": ".megaphone/launch/mastodon-launch.md",
+      "platform": "mastodon",
+      "offset": "08:00"
+    },
+    {
+      "file": ".megaphone/launch/hashnode-launch.md",
+      "platform": "hashnode",
+      "offset": "08:30"
+    },
+    {
+      "file": ".megaphone/launch/reddit-r-sideproject-launch.md",
+      "platform": "reddit",
+      "offset": "09:00",
+      "_note": "Reddit r/SideProject; check that .megaphone/overrides/reddit.json sets the subreddit"
+    }
+  ]
+}
