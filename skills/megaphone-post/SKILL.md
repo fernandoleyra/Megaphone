@@ -55,7 +55,7 @@ There are two flavors of post target:
 - Peerlist Launchpad (forum-style, weekly batch)
 - Hashnode (long-form developer blogging)
 
-If the user said "draft a Reddit post" or "write a Show HN", treat it as a community draft and read `references/community-drafting.md` before writing — it has per-venue cultural rules that look very different from feed-platform tone.
+If the user said "draft a Reddit post" or "write a Show HN", treat it as a community draft and read `references/community-aware-drafting.md` before writing — it has per-venue cultural rules that look very different from feed-platform tone.
 
 If the user said "draft for Bluesky / LinkedIn / X / Threads / Mastodon / dev.to", treat it as a feed draft and read `references/platform-voice.md` for sizing and tone.
 
