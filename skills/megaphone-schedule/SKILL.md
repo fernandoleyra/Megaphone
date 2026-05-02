@@ -13,6 +13,14 @@ The model is hybrid (research-backed) and matches the three real things people w
 - **Cadence** — "every Friday at 10am, pop the next file from `posts/evergreen/bluesky/` and post it" (Postiz-style recurring; competitors do it badly)
 - **Sequence** — "on launch day: 8am Bluesky, 9am LinkedIn, 10am dev.to, 11am Mastodon" (nobody does this well — it's our wedge)
 
+## Preamble: project resolution & bash hygiene
+
+This skill operates inside a single project root and reads `.megaphone/profile.json` from there. Before doing anything:
+
+1. **Resolve the target project.** If the cwd already looks like a project (`.git/`, `package.json`, etc.) and contains `.megaphone/profile.json`, use it. Otherwise, follow the resolution flow from `megaphone-init` §0b — confirm `<basename>` for cwd, or pick from memory candidates / paste a path. Never assume `$HOME` is the project.
+2. **Exit-zero probes.** When checking for files that may not exist, wrap probes in `sh -c '...; exit 0'` and use `[ -e "<path>" ]` guards. Never let a missing file produce a visible red error block on first run.
+3. **Absolute paths after resolution.** Once the target is known, use absolute paths for every Read/Write and prefix Bash with `cd "<path>" && ...`.
+
 ## Storage
 
 Per-repo, all under `.megaphone/schedule/`:

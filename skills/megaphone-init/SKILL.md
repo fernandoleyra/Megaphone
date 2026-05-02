@@ -13,20 +13,75 @@ The profile is small but high-leverage. Every later skill (`megaphone-assets`, `
 
 ### 0. Resolve the target project directory
 
-Megaphone always operates on a single project root. Before anything else, figure out which directory that is. Do **not** assume the current working directory is correct — the skill is often invoked from `$HOME` or an empty chat with no project context.
+Megaphone always operates on a single project root. Claude Code sessions almost always start in `$HOME`, so do **not** assume cwd is the project. Resolve the target before doing anything else, and do it without producing visible shell errors.
 
-Steps:
+#### 0a. Probe cwd silently
 
-1. **Check the cwd for project signals.** Probe with a single non-fatal command — use `;` not `&&`, and add `2>/dev/null` so a missing path doesn't abort the rest. Example: `ls -la .megaphone 2>/dev/null; ls README.md package.json pyproject.toml Cargo.toml go.mod 2>/dev/null; ls -d .git 2>/dev/null; pwd`. A directory is a plausible project root if it contains any of: `.git/`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `README.md`, or an existing `.megaphone/` folder.
-2. **If cwd is a project root**, use it and continue to step 1.
-3. **If cwd is not a project root** (e.g. `$HOME`, `/tmp`, an empty dir):
-   - Tell the user plainly: "You're in `<cwd>`, which doesn't look like a project. Megaphone needs to run inside the project you want to distribute."
-   - Offer two paths:
-     - **(a)** "Paste the absolute path of the project (e.g. `/Users/you/Developer/my-app`) and I'll initialize it there."
-     - **(b)** "Or tell me the project name and I'll look for it under common dev folders (`~/Developer`, `~/code`, `~/src`, `~/projects`, `~/work`)." If they pick this, scan up to 2 levels deep with `find ~/Developer ~/code ~/src ~/projects ~/work -maxdepth 3 -type d -iname "<name>" 2>/dev/null`. If multiple candidates exist, list them and let the user choose.
-   - If the assistant has memory or recent conversation context pointing to a likely project (e.g. the user just said "init megaphone for Hearsh"), surface that path as the suggested default — but still confirm before writing.
-4. **Once a target path is resolved, use absolute paths for the rest of the skill.** Either `cd "<path>"` once at the start of any Bash invocation, or pass the absolute path to every `Read`/`Write`. Never write `.megaphone/` outside the resolved target.
-5. **Bash hygiene reminder for the rest of the skill:** when probing for files that may not exist, chain with `;` not `&&`, and add `2>/dev/null` so the chain reports useful output instead of silently failing on the first missing path.
+Run **one** Bash call that is guaranteed to exit 0 — never chain with `&&`, never let `ls` fail on a missing glob. Use a wrapped form like this:
+
+```bash
+sh -c '
+  cd "$PWD"
+  echo "CWD=$PWD"
+  echo "BASENAME=$(basename "$PWD")"
+  for f in .git package.json pyproject.toml Cargo.toml go.mod README.md .megaphone; do
+    [ -e "$f" ] && echo "HAS=$f"
+  done
+  exit 0
+'
+```
+
+A directory counts as a "plausible project root" if it has any of: `.git/`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `README.md`, or an existing `.megaphone/`.
+
+#### 0b. Branch on what you found
+
+**Case A — cwd IS a plausible project root** (we're already inside a project):
+
+Ask the user a single confirmation:
+
+> "Initialize Megaphone for **`<basename>`** at `<cwd>`? (Y/n)"
+
+- Y or no answer → use cwd, continue to step 1.
+- N → fall through to Case B.
+
+**Case B — cwd is NOT a project root** (e.g. `$HOME`, `/tmp`, empty dir):
+
+Don't print a shell-style error. Just tell the user plainly that we need to pick a project, then **lead with memory candidates** — that's the priority path:
+
+1. **Read the user's memory index first.** Open `~/.claude/projects/-Users-leyra/memory/MEMORY.md` and look for entries of type `project` (typically files named `project_*.md` or `*_startup.md`). Each project memory usually contains a path or repo location — pull the project name and any directory hint.
+2. **Present them as a numbered list of candidates**, with the path if known. Format:
+
+   > Megaphone needs a project. Here are projects I see in your memory:
+   >
+   > 1. **Behavioral Brain** — `/Users/leyra/Developer/03_AI_Agents/BehavioralBrain` *(if path known)*
+   > 2. **Hearsh waitlist** — *(path unknown)*
+   > 3. **Leyra Vibe Coder site** — *(path unknown)*
+   > 4. **FrinkLoop** — `/Users/leyra/Developer/03_AI_Agents/FrinkLoop`
+   > 5. **Clearly** — *(path unknown)*
+   > 6. **Polyoracle** — *(path unknown)*
+   >
+   > Reply with a number, or paste an absolute path if your project isn't listed.
+
+3. **If the user picks a number but the path is unknown**, ask once: "What's the absolute path for `<name>`?" Optionally offer to search common dev folders: `find ~/Developer ~/code ~/src ~/projects ~/work -maxdepth 3 -type d -iname "<name>" 2>/dev/null`.
+4. **If the user pastes a path**, verify it exists with a silent probe (`[ -d "<path>" ] && echo OK || echo MISSING`). If missing, say so and re-ask.
+
+#### 0c. Lock in absolute paths
+
+Once a target path is resolved:
+
+- Use **absolute paths for every Read/Write** for the rest of this skill. Don't rely on cwd.
+- For Bash calls, prefix with `cd "<absolute-path>" && ...` so each call is self-contained.
+- Never write `.megaphone/` outside the resolved target.
+
+#### 0d. Bash hygiene for later steps
+
+When probing for files that may or may not exist, always:
+
+- Use `[ -e "<path>" ]` guards instead of bare `ls`.
+- Wrap multi-step probes in `sh -c '...; exit 0'` so the call always exits 0.
+- Never chain unknowns with `&&`.
+
+This is the rule that prevents the "red error block on init" the user has explicitly objected to.
 
 ### 1. Detect whether megaphone is already initialized
 

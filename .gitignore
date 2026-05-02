@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+
+# Editor / IDE
+.history/
+.vscode/
+.idea/
+*.swp
+
+# Logs / runtime
+*.log
+.megaphone/
+~/.megaphone/
+
+# Build artifacts
+*.plugin
+dist/
+build/

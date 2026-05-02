@@ -9,6 +9,14 @@ A README hero is fine. A README with a demo GIF is twice as good. This skill wal
 
 We don't ship a video editor. We ship a config-driven runner that keeps the demo reproducible — when the UI changes, re-run the same JSON and the GIF regenerates.
 
+## Preamble: project resolution & bash hygiene
+
+This skill operates inside a single project root and reads `.megaphone/profile.json` from there. Before doing anything:
+
+1. **Resolve the target project.** If the cwd already looks like a project (`.git/`, `package.json`, etc.) and contains `.megaphone/profile.json`, use it. Otherwise, follow the resolution flow from `megaphone-init` §0b — confirm `<basename>` for cwd, or pick from memory candidates / paste a path. Never assume `$HOME` is the project.
+2. **Exit-zero probes.** When checking for files that may not exist, wrap probes in `sh -c '...; exit 0'` and use `[ -e "<path>" ]` guards. Never let a missing file produce a visible red error block on first run.
+3. **Absolute paths after resolution.** Once the target is known, use absolute paths for every Read/Write and prefix Bash with `cd "<path>" && ...`.
+
 ## Prerequisites
 
 The runner uses Playwright (Node) and ffmpeg. Both are one-time installs.
