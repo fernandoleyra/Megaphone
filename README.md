@@ -13,7 +13,7 @@
   <a href="https://github.com/fernandoleyra/megaphone/stargazers"><img src="https://img.shields.io/github/stars/fernandoleyra/megaphone?style=flat-square" alt="Stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-Plugin-8B5CF6?style=flat-square" alt="Claude Code Plugin">
-  <img src="https://img.shields.io/badge/version-0.6.1-orange?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.7.0-orange?style=flat-square" alt="Version">
 </p>
 
 ---
@@ -26,18 +26,35 @@ Your OAuth tokens stay on your machine. No backend. No subscription.
 
 ## Install
 
-In Claude Code, run two commands:
+In Claude Code, run:
 
 ```
 /plugin marketplace add fernandoleyra/megaphone
 /plugin install megaphone
 ```
 
-That's it. The plugin loads its 9 skills into your session. Type `/plugin list` to confirm.
+Then enable it: run `/plugin`, find **megaphone** in the list, and toggle it on. Apply with `/reload-plugins` (or restart Claude Code). You'll get **9 skills** (auto-triggered from natural language) and **6 slash commands** (for explicit invocation).
+
+If skills or commands don't show up, run `/plugin` again and confirm megaphone is enabled, then `/reload-plugins`.
+
+## Slash commands
+
+| Command | What it does |
+|---|---|
+| `/megaphone:init` | Scan repo, write `.megaphone/profile.json` |
+| `/megaphone:post` | Draft a community-aware post for a venue |
+| `/megaphone:publish` | Publish a draft to a live platform |
+| `/megaphone:schedule` | Schedule a post, cadence, or launch sequence |
+| `/megaphone:audit` | Landing page + user journey audit |
+| `/megaphone:digest` | Weekly traction digest |
+
+The other three skills (`megaphone-assets`, `megaphone-demo`, `megaphone-outreach`) are conversational by nature — invoke them by describing what you want.
 
 ## What you get — 9 skills
 
-| Skill | Trigger phrases | What it does |
+These auto-trigger when Claude detects a matching intent in your message. The phrases below are examples — exact wording isn't required.
+
+| Skill | Example phrases | What it does |
 |---|---|---|
 | `megaphone-init` | "set up megaphone", "init megaphone for this repo" | Scans your repo and writes `.megaphone/profile.json` capturing what your project is, who it's for, and how you sound. |
 | `megaphone-assets` | "generate marketing assets", "rewrite my README", "I need a banner" | One-liner, hook, README hero, dev.to intro, landing copy. Crafts banner-image prompts (NanoBanana / DALL·E). |
