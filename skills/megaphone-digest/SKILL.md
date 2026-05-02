@@ -66,7 +66,7 @@ Decision rules (in priority order):
 
 1. If a launch is within 14 days and the launch plan has unchecked tasks in the current phase → recommend the highest-impact unchecked task in that phase.
 2. If stars-per-week dropped 50%+ from last week and there hasn't been a build-in-public post in 14+ days → recommend `megaphone-post`.
-3. If `.megaphone/discover/` doesn't exist or hasn't been refreshed in 30+ days → recommend `megaphone-discover`.
+3. If `.megaphone/outreach/venues.json` doesn't exist or hasn't been refreshed in 30+ days → recommend `megaphone-outreach`.
 4. If commit activity is healthy but no posts have been written in 14+ days → recommend `megaphone-post`.
 5. If `.megaphone/assets/` is missing the README hero or the dev.to intro → recommend `megaphone-assets`.
 6. If everything is being done and metrics are growing → recommend "stay the course; ship the next feature."
@@ -131,4 +131,4 @@ Paste the digest into the conversation (it's short — pasting back is fine here
 - **No metrics history yet** — call it "baseline week", report current values without deltas.
 - **GitHub API rate-limited** — note it; offer to retry with auth (`gh auth login`).
 - **Private repo, no `gh` CLI** — fall back to local git data only; tell the user once that to get full metrics they need to authenticate or make the repo public.
-- **Project hasn't shipped anything in weeks AND no posts AND no launch plan** — be direct: "There's not much to digest yet. Probably worth either shipping a small thing this week or running `/megaphone-launch` if you're getting close to ready." Don't invent metrics to make it look like progress.
+- **Project hasn't shipped anything in weeks AND no posts AND no launch plan** — be direct: "There's not much to digest yet. Probably worth either shipping a small thing this week or running `/megaphone-outreach` if you're getting close to ready." Don't invent metrics to make it look like progress.

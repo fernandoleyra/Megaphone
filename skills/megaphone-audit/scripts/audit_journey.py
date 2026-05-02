@@ -188,7 +188,7 @@ def recent_activity(repo: Path) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Landing fetch (lightweight; full audit lives in megaphone-landing-audit)
+# Landing fetch (lightweight; full audit lives in megaphone-audit landing mode)
 # ---------------------------------------------------------------------------
 
 def fetch_landing(target: str) -> dict:
@@ -196,7 +196,7 @@ def fetch_landing(target: str) -> dict:
         return {"available": False}
     try:
         if target.startswith("http"):
-            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-journey-audit/0.4"})
+            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-audit-journey/0.4"})
             with urllib.request.urlopen(req, timeout=15) as r:
                 body = r.read().decode("utf-8", errors="replace")
         else:

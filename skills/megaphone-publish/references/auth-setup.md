@@ -140,7 +140,7 @@ Threads can be controlled in the draft by separating tweets with a line of `---`
 
 ## What megaphone-publish refuses to support
 
-- **Hacker News.** Submissions must come from a real human account with karma; the API doesn't accept programmatic submits. Use `megaphone-launch` to draft the Show HN title and copy, then submit by hand.
-- **Awesome-list PRs.** Maintainers explicitly reject AI-generated submissions in many lists. `megaphone-discover` produces ready-to-paste packets; you submit them.
+- **Hacker News.** Submissions must come from a real human account with karma; the API doesn't accept programmatic submits. Use `megaphone-outreach` to draft the Show HN title and copy, then submit by hand.
+- **Awesome-list PRs.** Maintainers explicitly reject AI-generated submissions in many lists. `megaphone-outreach` produces ready-to-paste packets; you submit them.
 - **Instagram / TikTok / Threads (Meta) / YouTube.** Their OAuth and content rules add a lot of complexity (business account requirements, video transcoding, vertical aspect ratios) that's out of scope for v1. Use Postiz or Upload-Post if you need them today; megaphone may add them later.
 - **Cross-posting identical text.** `megaphone-post` writes a different draft per platform. The publish dispatcher only ever sends `<platform>.md` to the matching platform — it will not duplicate.

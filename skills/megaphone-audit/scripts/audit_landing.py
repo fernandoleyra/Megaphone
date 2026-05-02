@@ -201,7 +201,7 @@ def load_target(target: str) -> tuple[str, dict]:
     """Return (html, meta) where meta has page_bytes, is_https, fetch_error."""
     if target.startswith("http://") or target.startswith("https://"):
         try:
-            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-landing-audit/0.4"})
+            req = urllib.request.Request(target, headers={"User-Agent": "megaphone-audit-landing/0.4"})
             with urllib.request.urlopen(req, timeout=20) as resp:
                 body = resp.read()
             return body.decode("utf-8", errors="replace"), {
