@@ -197,7 +197,24 @@ Build the dated checklist using the **30/14/6/0** cadence:
 - Submit to any awesome-lists where the project clearly belongs (use Phase 1)
 - Run `/megaphone-digest` to capture before/after metrics
 
-Save the master plan to `.megaphone/outreach/launch-plan.md` and per-channel submission packets to `.megaphone/outreach/launch/<channel>.md`.
+Save the master plan to `.megaphone/launch/launch-plan.md`, per-channel submission packets to `.megaphone/launch/<channel>.md`, and a `sequence.json` describing the cross-platform timing — this is the file `megaphone-schedule` reads to fan out the launch-day sequence.
+
+The `sequence.json` shape (consumed by `megaphone-schedule add-sequence`):
+
+```json
+{
+  "name": "v0.1-launch",
+  "anchor_date": "2026-05-15",
+  "timezone": "America/Los_Angeles",
+  "items": [
+    { "platform": "bluesky",  "offset": "00:00", "file": ".megaphone/launch/bluesky.md"  },
+    { "platform": "linkedin", "offset": "01:00", "file": ".megaphone/launch/linkedin.md" },
+    { "platform": "devto",    "offset": "02:00", "file": ".megaphone/launch/devto.md"    }
+  ]
+}
+```
+
+Per-channel files are written as `.megaphone/launch/<platform>.md` (or non-publish channels like `producthunt.md`, `show-hn.md`). Use the canonical platform IDs from `skills/megaphone-publish/references/platform-ids.md`.
 
 For platforms requiring human submission (Show HN, Reddit, sometimes dev.to), call this out explicitly in the plan: **"This must be submitted by a real human account; copy below is ready to paste."**
 
@@ -208,17 +225,19 @@ Per-repo:
 .megaphone/outreach/
 ├── venues.json              ← Phase 1 raw
 ├── amplifiers.json          ← Phase 2 raw
-├── launch-plan.md           ← Phase 4 master plan
 ├── venues/
 │   └── <slug>/packet.md     ← Per-venue submission copy
-├── dms/
-│   └── <handle>.md          ← Per-amplifier DMs
-└── launch/
-    ├── producthunt.md
-    ├── show-hn.md
-    ├── betalist.md
-    ├── peerlist.md
-    └── ...
+└── dms/
+    └── <handle>.md          ← Per-amplifier DMs
+
+.megaphone/launch/             ← Phase 4 output, canonical home
+├── launch-plan.md            ← master plan (read by /megaphone-digest)
+├── sequence.json             ← timing for /megaphone-schedule
+├── producthunt.md
+├── show-hn.md
+├── betalist.md
+├── peerlist.md
+└── ...
 ```
 
 Everything lives in the repo so it's `git diff`-able and survives across sessions.
@@ -231,7 +250,7 @@ End with one suggested next move:
 - After Phase 1 → "Want me to find amplifiers next? (Phase 2)"
 - After Phase 2 → "Want me to draft the DMs? (Phase 3)"
 - After Phase 3 → "Want me to weave these into a dated launch plan? (Phase 4)"
-- After Phase 4 → "Plan is in `.megaphone/outreach/launch-plan.md`. Want me to schedule the social posts via `/megaphone-schedule`?"
+- After Phase 4 → "Plan is in `.megaphone/launch/launch-plan.md`. Want me to schedule the social posts via `/megaphone-schedule`?"
 
 ## Honesty and ethics rules
 

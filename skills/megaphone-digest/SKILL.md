@@ -23,7 +23,7 @@ This skill operates inside a single project root and reads `.megaphone/profile.j
 
 - Read `.megaphone/profile.json`. Required.
 - Read the most recent file in `.megaphone/metrics/`, if any — that's the previous digest, used for delta math.
-- Read `.megaphone/launch-plan.md`, if present — to know whether the user is pre-launch, mid-launch, or post-launch.
+- Read `.megaphone/launch/launch-plan.md`, if present — to know whether the user is pre-launch, mid-launch, or post-launch.
 
 ### 2. Pull current metrics
 
@@ -44,7 +44,7 @@ This skill operates inside a single project root and reads `.megaphone/profile.j
 - Count `ok: true` lines per platform; surface the URL of the top engagement (when known) or the most recent post per platform.
 - This is what tells the user "you actually shipped 3 posts this week" vs "you drafted 5 but published 0" — a much more honest signal than just counting drafts.
 
-**Launch progress** (if `.megaphone/launch-plan.md` exists)
+**Launch progress** (if `.megaphone/launch/launch-plan.md` exists)
 - Count completed checkboxes (`- [x]`) vs total. Surface the next 3 unchecked items.
 
 ### 3. Compute deltas

@@ -106,10 +106,10 @@ Sequence file format (this is the format `megaphone-outreach` Phase 4 writes whe
   "anchor_date": "2026-05-15",
   "timezone": "America/Los_Angeles",
   "items": [
-    {"file": ".megaphone/launch/bluesky-launch.md",  "platform": "bluesky",  "offset": "00:00"},
-    {"file": ".megaphone/launch/linkedin-launch.md", "platform": "linkedin", "offset": "01:00"},
-    {"file": ".megaphone/launch/devto-launch.md",    "platform": "devto",    "offset": "02:00"},
-    {"file": ".megaphone/launch/mastodon-launch.md", "platform": "mastodon", "offset": "03:00"}
+    {"file": ".megaphone/launch/bluesky.md",  "platform": "bluesky",  "offset": "00:00"},
+    {"file": ".megaphone/launch/linkedin.md", "platform": "linkedin", "offset": "01:00"},
+    {"file": ".megaphone/launch/devto.md",    "platform": "devto",    "offset": "02:00"},
+    {"file": ".megaphone/launch/mastodon.md", "platform": "mastodon", "offset": "03:00"}
   ]
 }
 ```
