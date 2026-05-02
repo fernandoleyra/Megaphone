@@ -11,9 +11,26 @@ The profile is small but high-leverage. Every later skill (`megaphone-assets`, `
 
 ## Workflow
 
+### 0. Resolve the target project directory
+
+Megaphone always operates on a single project root. Before anything else, figure out which directory that is. Do **not** assume the current working directory is correct — the skill is often invoked from `$HOME` or an empty chat with no project context.
+
+Steps:
+
+1. **Check the cwd for project signals.** Probe with a single non-fatal command — use `;` not `&&`, and add `2>/dev/null` so a missing path doesn't abort the rest. Example: `ls -la .megaphone 2>/dev/null; ls README.md package.json pyproject.toml Cargo.toml go.mod 2>/dev/null; ls -d .git 2>/dev/null; pwd`. A directory is a plausible project root if it contains any of: `.git/`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `README.md`, or an existing `.megaphone/` folder.
+2. **If cwd is a project root**, use it and continue to step 1.
+3. **If cwd is not a project root** (e.g. `$HOME`, `/tmp`, an empty dir):
+   - Tell the user plainly: "You're in `<cwd>`, which doesn't look like a project. Megaphone needs to run inside the project you want to distribute."
+   - Offer two paths:
+     - **(a)** "Paste the absolute path of the project (e.g. `/Users/you/Developer/my-app`) and I'll initialize it there."
+     - **(b)** "Or tell me the project name and I'll look for it under common dev folders (`~/Developer`, `~/code`, `~/src`, `~/projects`, `~/work`)." If they pick this, scan up to 2 levels deep with `find ~/Developer ~/code ~/src ~/projects ~/work -maxdepth 3 -type d -iname "<name>" 2>/dev/null`. If multiple candidates exist, list them and let the user choose.
+   - If the assistant has memory or recent conversation context pointing to a likely project (e.g. the user just said "init megaphone for Hearsh"), surface that path as the suggested default — but still confirm before writing.
+4. **Once a target path is resolved, use absolute paths for the rest of the skill.** Either `cd "<path>"` once at the start of any Bash invocation, or pass the absolute path to every `Read`/`Write`. Never write `.megaphone/` outside the resolved target.
+5. **Bash hygiene reminder for the rest of the skill:** when probing for files that may not exist, chain with `;` not `&&`, and add `2>/dev/null` so the chain reports useful output instead of silently failing on the first missing path.
+
 ### 1. Detect whether megaphone is already initialized
 
-Check for `.megaphone/profile.json` at the repo root.
+Check for `.megaphone/profile.json` at the resolved project root.
 
 - If it exists, read it and confirm with the user: "Megaphone is already set up for this repo. Want me to refresh the profile, or jump to a specific skill (assets, launch, post, discover, digest)?"
 - If it doesn't, proceed.
