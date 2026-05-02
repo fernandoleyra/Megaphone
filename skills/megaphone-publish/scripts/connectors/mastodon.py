@@ -8,10 +8,18 @@ Credential schema: { "instance": "fosstodon.org", "access_token": "xxx" }"""
 
 from __future__ import annotations
 
+import re
 from typing import Optional
 
 from connectors._base import PostResult
 from _http import HttpError, post_form
+
+# RFC 1123-style hostname: at least two labels, alphanumerics + hyphens,
+# 63-char per-label cap, no leading/trailing hyphens, no IPs, no paths.
+_HOSTNAME_RE = re.compile(
+    r"^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?"
+    r"(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$"
+)
 
 
 def publish(body: str, credentials: dict, overrides: Optional[dict] = None) -> PostResult:
@@ -57,6 +65,13 @@ def connect(prompt) -> dict:
     if instance.startswith("http://"):
         instance = instance[len("http://"):]
     instance = instance.rstrip("/")
+    if not _HOSTNAME_RE.match(instance):
+        # Block IP literals, paths, and other non-hostname inputs that would
+        # let an attacker pivot the request to internal services (SSRF).
+        raise ValueError(
+            "Invalid Mastodon instance hostname. "
+            "Expected a public DNS name like 'fosstodon.org'."
+        )
     token = prompt("Access token: ", secret=True)
     if not instance or not token:
         raise RuntimeError("Instance and access token are both required.")
