@@ -142,7 +142,7 @@ Paste the output back to the user so they can see at a glance what's scheduled a
 python3 schedule.py suggest-time --platform bluesky --audience indie-dev
 ```
 
-Returns the platform's best-window data informed by 2025–2026 industry research (`references/best-time-data.md`) plus, where available, the user's own past engagement from `.megaphone/published/` records.
+Returns the platform's best-window data informed by 2025–2026 industry research (`references/best-time-data.md`) plus, where available, the user's own past engagement from `.megaphone/published/` records. The `--platform` flag accepts the canonical IDs from `../megaphone-publish/references/platform-ids.md` (`bluesky`, `x`, `linkedin`, `devto`, `mastodon`, `threads`, `hashnode`, `reddit`).
 
 **The skill should propose a time using `suggest-time` whenever the user says "schedule it for the right time" without naming one.** Default audience is `indie-dev` because that's our user; override per-project with `.megaphone/profile.json` → `audience.primary`.
 

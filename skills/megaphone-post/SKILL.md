@@ -25,6 +25,7 @@ This skill operates inside a single project root and reads `.megaphone/profile.j
   - `git log --since="7 days ago" --stat --no-merges` for context on the size of changes
   - For releases: `git tag --sort=-creatordate | head -3` and `git log <last-tag>..HEAD --oneline`
 - Read `references/platform-voice.md` for the per-platform shape, length, and tone.
+- For the canonical platform-ID list (used in file names and CLI flags), refer to `../megaphone-publish/references/platform-ids.md`.
 
 ### 2. Pick the angle
 

@@ -99,7 +99,7 @@ End with one suggested next move: if all succeeded, run `megaphone-digest` next 
 
 ## Per-platform auth in one paragraph each
 
-Full instructions in `references/auth-setup.md` — read that file before walking the user through any platform.
+Full instructions in `references/auth-setup.md` — read that file before walking the user through any platform. Canonical platform IDs (used in every CLI flag and file path) live in `references/platform-ids.md`.
 
 - **Bluesky** — generate an "App Password" in Settings → App Passwords. Paste it. ~30 seconds.
 - **dev.to** — Settings → Account → API Keys → "Generate new key". Paste it. ~30 seconds.
