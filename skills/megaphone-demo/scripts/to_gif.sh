@@ -44,12 +44,12 @@ PALETTE="$(mktemp -t megaphone-palette-XXXXXX.png)"
 FILTER="fps=${FPS},scale=${WIDTH}:-1:flags=lanczos"
 
 # Pass 1 — generate optimized palette
-ffmpeg -y -framerate "$FPS" -i "${FRAMES_DIR}/%03d_*.png" \
+ffmpeg -y -framerate "$FPS" -pattern_type glob -i "${FRAMES_DIR}/*.png" \
   -vf "${FILTER},palettegen=max_colors=128:stats_mode=diff" \
   "$PALETTE" 2>/dev/null
 
 # Pass 2 — encode using the palette
-ffmpeg -y -framerate "$FPS" -i "${FRAMES_DIR}/%03d_*.png" -i "$PALETTE" \
+ffmpeg -y -framerate "$FPS" -pattern_type glob -i "${FRAMES_DIR}/*.png" -i "$PALETTE" \
   -filter_complex "${FILTER}[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" \
   "$OUT" 2>/dev/null
 

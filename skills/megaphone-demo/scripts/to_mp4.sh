@@ -31,7 +31,7 @@ fi
 
 mkdir -p "$(dirname "$OUT")"
 
-ffmpeg -y -framerate "$FPS" -i "${FRAMES_DIR}/%03d_*.png" \
+ffmpeg -y -framerate "$FPS" -pattern_type glob -i "${FRAMES_DIR}/*.png" \
   -c:v libx264 -pix_fmt yuv420p -crf 22 \
   -vf "scale=${WIDTH}:trunc(ow/a/2)*2:flags=lanczos" \
   -movflags +faststart \
