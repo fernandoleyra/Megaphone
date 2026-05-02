@@ -94,7 +94,10 @@ This is the rule that prevents the "red error block on init" the user has explic
 
 Check for `.megaphone/profile.json` at the resolved project root.
 
-- If it exists, read it and confirm with the user: "Megaphone is already set up for this repo. Want me to refresh the profile, or jump to a specific skill (assets, launch, post, discover, digest)?"
+- If it exists, read it and ask the user which path they want:
+  - **refresh the profile** — re-run steps 2–4 to update tagline, audience, voice samples
+  - **manage connections** — jump to step 6 (status table + connect/reconnect for distribution channels)
+  - **jump to another skill** — `/megaphone-assets`, `/megaphone-post`, `/megaphone-outreach`, `/megaphone-publish`, `/megaphone-schedule`, `/megaphone-audit`, `/megaphone-demo`, `/megaphone-digest`
 - If it doesn't, proceed.
 
 ### 2. Scan the repo silently
@@ -184,7 +187,79 @@ Don't dump the full menu of skills on the user. Pick the single highest-value ne
 - If they want stars → "Want me to find awesome-lists where this belongs? (`/megaphone-outreach`)"
 - If they're early and unsure → "Want a quick set of marketing assets so the README and socials don't look empty? (`/megaphone-assets`)"
 
-Keep the suggestion to one line. End the turn.
+Keep the suggestion to one line. **Before ending the turn, also walk the user through §6 below** if `platforms.connected[]` is empty — having at least one channel connected makes every later skill (post, publish, schedule) more useful.
+
+### 6. Connect distribution channels (optional, recommended)
+
+Megaphone publishes locally — no SaaS in the middle, credentials live in `~/.megaphone/credentials/<id>.json` (chmod 0600), shared across every project on this machine. Connect once, use everywhere.
+
+#### 6a. Show the current status
+
+Run the auth helper and parse its JSON output:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py status
+```
+
+The output is a single JSON line: `{"platforms": [{"platform": "<id>", "connected": <bool>, "since": "<ISO8601 or null>", "expired": <bool>}, ...]}`. Render it as a markdown table:
+
+```
+Platform    Status                              Action
+Bluesky     ✓ connected (since 2026-04-15)      reconnect
+X           ⚠ token expired                     reconnect
+LinkedIn    – not connected                     connect
+dev.to      – not connected                     connect
+Reddit      – not connected                     connect
+Mastodon    – not connected                     connect
+Hashnode    – not connected                     connect
+```
+
+Icons: `✓` connected, `⚠` expired (re-auth needed), `–` not connected.
+
+#### 6b. Ask which platforms to connect
+
+Single multi-select question:
+
+> Want to connect any platforms now? Reply with platform IDs (e.g. `bluesky linkedin`), `all` to walk every disconnected one, or `skip` to do this later.
+
+Use the canonical IDs from `skills/megaphone-publish/references/platform-ids.md`. Aliases like `twitter` or `bsky` should be normalized before invoking the connector.
+
+#### 6c. Run each connect
+
+For each chosen platform:
+
+```bash
+python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py connect <id>
+```
+
+Stream stdout and stderr to the user — the connector prints platform-specific instructions, opens the browser for OAuth where applicable, or prompts for a token paste. Wait for it to finish before moving to the next platform.
+
+After each successful connect:
+
+1. Read `.megaphone/profile.json`.
+2. Append the platform `<id>` to `platforms.connected[]` (de-dup if already present).
+3. Write the file back.
+
+If a connect fails, surface the error verbatim and offer to retry that platform or skip it. Do NOT mutate `platforms.connected[]` for failed connects.
+
+#### 6d. Print the final status
+
+Re-run the status command and render the updated table. End with a one-line confirmation: e.g. "Connected 2 platforms. Two more available — run `/megaphone-init` and pick `manage connections` whenever you're ready."
+
+### 6.1. Manage connections later
+
+These three actions cover every post-init scenario:
+
+- **Check status:** re-invoke `/megaphone-init` and pick `manage connections` from §1's existing-profile menu, or run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py status` from anywhere.
+- **Reconnect a failed or expired platform:** `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py connect <id>` — overwrites the existing credentials. Or invoke `/megaphone-publish` and ask to reconnect; it offers the same flow as a fallback.
+- **Remove a connection:** `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py disconnect <id>` — deletes the credential file. Also remove the `<id>` from `platforms.connected[]` in the project's `.megaphone/profile.json`.
+
+Two important truths to surface to the user during init:
+
+1. **Credentials are user-global, not per-project.** They live at `~/.megaphone/credentials/<id>.json` (chmod 0600) and are shared across every project on this machine. They are never stored inside the repo.
+2. **Per-project preferences and overrides** (visibility, hashtag policy, draft directories) live inside each project's `.megaphone/` and are repo-local.
+
+If a publish or schedule call later reports `auth_error` or `token expired`, the user can always come back to §6c and reconnect — that path is the canonical recovery.
 
 ## Edge cases
 

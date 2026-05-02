@@ -38,15 +38,46 @@ from _common import (  # noqa: E402
 SUPPORTED = ["bluesky", "devto", "linkedin", "reddit", "mastodon", "x", "hashnode"]
 
 
+def _platform_status(platform: str) -> dict:
+    """Per-platform status row. Output is JSON-friendly."""
+    import datetime as _dt
+    import time as _time
+
+    from _common import cred_path
+
+    p = cred_path(platform)
+    creds = load_credentials(platform)
+    if creds is None:
+        return {
+            "platform": platform,
+            "connected": False,
+            "since": None,
+            "expired": False,
+        }
+    # `since` = mtime of the credential file (when the user last connected).
+    try:
+        mtime = p.stat().st_mtime
+        since = _dt.datetime.fromtimestamp(mtime, tz=_dt.timezone.utc).isoformat()
+    except OSError:
+        since = None
+    # `expired` = creds carry an expires_at in the past (numeric epoch seconds).
+    expired = False
+    exp = creds.get("expires_at") if isinstance(creds, dict) else None
+    if isinstance(exp, (int, float)) and exp > 0 and exp < _time.time():
+        expired = True
+    return {
+        "platform": platform,
+        "connected": True,
+        "since": since,
+        "expired": expired,
+    }
+
+
 def cmd_status(args: argparse.Namespace) -> None:
     if args.platform:
-        creds = load_credentials(args.platform)
-        emit({"platform": args.platform, "connected": creds is not None})
+        emit(_platform_status(args.platform))
         return
-    out = []
-    for p in SUPPORTED:
-        out.append({"platform": p, "connected": load_credentials(p) is not None})
-    emit({"platforms": out})
+    emit({"platforms": [_platform_status(p) for p in SUPPORTED]})
 
 
 def cmd_connect(args: argparse.Namespace) -> None:
