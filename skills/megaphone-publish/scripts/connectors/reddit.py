@@ -14,6 +14,7 @@ Credential schema:
 from __future__ import annotations
 
 import base64
+import secrets
 import time
 import urllib.parse
 from typing import Optional
@@ -140,7 +141,7 @@ def connect(prompt) -> dict:
     if not client_id or not client_secret:
         raise RuntimeError("client_id and client_secret are required.")
 
-    state = "megaphone"
+    state = secrets.token_urlsafe(16)
     auth_qs = urllib.parse.urlencode(
         {
             "client_id": client_id,
@@ -153,7 +154,11 @@ def connect(prompt) -> dict:
     )
     print()
     print("Opening Reddit authorize page in your browser…")
-    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}")
+    try:
+        params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}", expected_state=state)
+    except RuntimeError as e:
+        # OAuth state mismatch — possible CSRF.
+        raise RuntimeError(f"Reddit auth aborted: {e}") from e
     if not params or "code" not in params:
         raise RuntimeError("Did not receive an OAuth code from Reddit.")
 

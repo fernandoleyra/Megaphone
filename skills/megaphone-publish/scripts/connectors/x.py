@@ -196,7 +196,11 @@ def connect(prompt) -> dict:
     )
     print()
     print("Opening X authorize page in your browser…")
-    params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}")
+    try:
+        params = capture_oauth_code(f"{AUTH_URL}?{auth_qs}", expected_state=state)
+    except RuntimeError as e:
+        # OAuth state mismatch — possible CSRF.
+        raise RuntimeError(f"X auth aborted: {e}") from e
     if not params or "code" not in params:
         raise RuntimeError("Did not receive an OAuth code from X.")
 
