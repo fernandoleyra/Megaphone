@@ -156,9 +156,18 @@ Create the directory if it doesn't exist. Schema:
 }
 ```
 
-Also create empty subdirectories the other skills will use: `.megaphone/assets/`, `.megaphone/posts/`, `.megaphone/metrics/`.
+Also create the empty subdirectories the other skills consume so no downstream skill has to guard a missing path:
 
-Add `.megaphone/metrics/` to `.gitignore` if a `.gitignore` exists — metrics are local-only noise.
+- `.megaphone/assets/` — `megaphone-assets`, `megaphone-demo` outputs
+- `.megaphone/posts/` and `.megaphone/posts/evergreen/` — `megaphone-post` dated drafts and `megaphone-schedule` cadence pool
+- `.megaphone/metrics/` — `megaphone-digest` weekly reports
+- `.megaphone/published/` — `megaphone-publish` JSONL receipts
+- `.megaphone/schedule/` — `megaphone-schedule` queue and cadences
+- `.megaphone/outreach/` — `megaphone-outreach` Phase 1–3 raw output
+- `.megaphone/audits/` — `megaphone-audit` landing/journey reports
+- `.megaphone/launch/` — `megaphone-outreach` Phase 4 launch artifacts (`launch-plan.md`, `sequence.json`, per-channel `<platform>.md`)
+
+Add `.megaphone/` to `.gitignore` if a `.gitignore` exists — the whole directory is local runtime state, not source.
 
 ### 5. Suggest the next step, briefly
 
