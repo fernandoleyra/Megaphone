@@ -20,7 +20,8 @@ This skill operates inside a single project root and reads `.megaphone/profile.j
 ### 1. Load context
 
 - Read `.megaphone/profile.json`. Required. If missing, run `megaphone-init` first.
-- Read recent git activity. Default to the last 7 days. Use Bash:
+- **Check for a git repo first.** Run `git rev-parse --is-inside-work-tree 2>/dev/null` — if it doesn't print `true`, skip the git block and ask the user instead: "I don't see a git history here — what shipped this week?" Use their answer as the activity to summarize.
+- If there is a git repo, read recent git activity. Default to the last 7 days. Use Bash:
   - `git log --since="7 days ago" --pretty=format:"%h %s" --no-merges`
   - `git log --since="7 days ago" --stat --no-merges` for context on the size of changes
   - For releases: `git tag --sort=-creatordate | head -3` and `git log <last-tag>..HEAD --oneline`

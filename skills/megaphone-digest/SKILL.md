@@ -32,9 +32,11 @@ This skill operates inside a single project root and reads `.megaphone/profile.j
 - Else, use the GitHub REST API via `curl`: `curl -s https://api.github.com/repos/<owner>/<repo>` and parse `stargazers_count`, `forks_count`, `open_issues_count`.
 - If neither works (no network, private repo without auth), report what we can read locally from git and note the gap.
 
-**Recent commits** (always)
-- `git log --since="7 days ago" --pretty=format:"%h %s" --no-merges`
-- `git log --since="7 days ago" --shortstat --no-merges` for size
+**Recent commits** (only when this is a git working tree)
+- First guard: `git rev-parse --is-inside-work-tree 2>/dev/null`. If it doesn't print `true`, skip the commit-based metrics and note "no git history available — skipping commit-based metrics" in the digest.
+- Otherwise:
+  - `git log --since="7 days ago" --pretty=format:"%h %s" --no-merges`
+  - `git log --since="7 days ago" --shortstat --no-merges` for size
 
 **Posts drafted this week** (if `.megaphone/posts/` exists)
 - Count files in `.megaphone/posts/` modified in the last 7 days.
