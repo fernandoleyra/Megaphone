@@ -140,7 +140,7 @@ Create the directory if it doesn't exist. Schema:
     "license": "MIT/etc."
   },
   "audience": {
-    "primary": "developers | end-users | designers | founders | other (specify)",
+    "primary": "developers | indie-dev | vibe-coder | end-users | designers | founders | other (specify)",
     "niches": ["specific communities"]
   },
   "goals": {
@@ -151,10 +151,17 @@ Create the directory if it doesn't exist. Schema:
     "samples": ["paste 1", "paste 2"],
     "guidance": "the inferred or default voice rules"
   },
+  "platforms": {
+    "connected": []
+  },
   "screenshots": ["path/to/image.png"],
   "notes": "anything else captured during init"
 }
 ```
+
+`platforms.connected[]` is a list of canonical platform IDs (see `skills/megaphone-publish/references/platform-ids.md`) the user has authenticated. It is appended to during step 6 (Connect distribution channels) and read by `megaphone-post`, `megaphone-publish`, and `megaphone-schedule` so they default to platforms the user actually has set up.
+
+`audience.primary` accepts the values above; `indie-dev` and `vibe-coder` are the most common for megaphone users and influence per-platform best-time defaults in `megaphone-schedule`.
 
 Also create the empty subdirectories the other skills consume so no downstream skill has to guard a missing path:
 
