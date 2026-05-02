@@ -18,9 +18,11 @@ venv/
 # Logs / runtime
 *.log
 .megaphone/
-~/.megaphone/
 
 # Build artifacts
 *.plugin
 dist/
 build/
+
+# Local Claude Code state (ralph-loop, hooks, scratch)
+.claude/
