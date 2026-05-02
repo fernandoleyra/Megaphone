@@ -46,24 +46,31 @@ Ask the user a single confirmation:
 
 **Case B — cwd is NOT a project root** (e.g. `$HOME`, `/tmp`, empty dir):
 
-Don't print a shell-style error. Just tell the user plainly that we need to pick a project, then **lead with memory candidates** — that's the priority path:
+Don't print a shell-style error. Just tell the user plainly that we need to pick a project, then **try memory candidates first** if any exist — that's the priority path. If no memory exists, skip straight to "paste an absolute path."
 
-1. **Read the user's memory index first.** Open `~/.claude/projects/-Users-leyra/memory/MEMORY.md` and look for entries of type `project` (typically files named `project_*.md` or `*_startup.md`). Each project memory usually contains a path or repo location — pull the project name and any directory hint.
-2. **Present them as a numbered list of candidates**, with the path if known. Format:
+1. **Look for the user's memory index.** Try the glob `~/.claude/projects/*/memory/MEMORY.md` and pick the first match. Use a silent probe like:
 
-   > Megaphone needs a project. Here are projects I see in your memory:
+   ```bash
+   sh -c 'for f in ~/.claude/projects/*/memory/MEMORY.md; do [ -e "$f" ] && echo "FOUND=$f" && break; done; exit 0'
+   ```
+
+   If nothing matches, jump to step 3 (path-paste fallback).
+
+2. **If a memory index exists, parse it for `project`-type entries** (typically files named `project_*.md` or `*_startup.md` referenced from `MEMORY.md`). Each project memory usually contains a path or repo location — pull the project name and any directory hint. Present them as a numbered list:
+
+   > Megaphone needs a project. Here are projects I found in your memory:
    >
-   > 1. **Behavioral Brain** — `/Users/leyra/Developer/03_AI_Agents/BehavioralBrain` *(if path known)*
-   > 2. **Hearsh waitlist** — *(path unknown)*
-   > 3. **Leyra Vibe Coder site** — *(path unknown)*
-   > 4. **FrinkLoop** — `/Users/leyra/Developer/03_AI_Agents/FrinkLoop`
-   > 5. **Clearly** — *(path unknown)*
-   > 6. **Polyoracle** — *(path unknown)*
+   > 1. **\<name\>** — `<path-if-known>` *(or `path unknown` if not)*
+   > 2. ...
    >
    > Reply with a number, or paste an absolute path if your project isn't listed.
 
-3. **If the user picks a number but the path is unknown**, ask once: "What's the absolute path for `<name>`?" Optionally offer to search common dev folders: `find ~/Developer ~/code ~/src ~/projects ~/work -maxdepth 3 -type d -iname "<name>" 2>/dev/null`.
-4. **If the user pastes a path**, verify it exists with a silent probe (`[ -d "<path>" ] && echo OK || echo MISSING`). If missing, say so and re-ask.
+3. **No memory found, or user pastes a path:** ask plainly:
+
+   > Megaphone needs a project. Paste the absolute path of the project you want to distribute (e.g. `/Users/you/Developer/my-app`).
+
+4. **If the user picks a number but the path is unknown**, ask once: "What's the absolute path for `<name>`?" Optionally offer to search common dev folders: `find ~/Developer ~/code ~/src ~/projects ~/work -maxdepth 3 -type d -iname "<name>" 2>/dev/null`.
+5. **If the user pastes a path**, verify it exists with a silent probe (`[ -d "<path>" ] && echo OK || echo MISSING`). If missing, say so and re-ask.
 
 #### 0c. Lock in absolute paths
 
