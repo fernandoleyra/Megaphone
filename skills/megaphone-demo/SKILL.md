@@ -1,13 +1,16 @@
 ---
 name: megaphone-demo
-description: Record a short demo GIF or MP4 of a deployed web app by walking a user-described "happy path" - clicks, typing, navigation - using a headless browser. Use this skill whenever the user asks to "make a demo gif", "record a demo", "create a screencast for my README", "generate a demo for the landing page", "I need a hero animation", "show what the app does in a gif", or anything where they want a short, scripted, visual recording of their app to embed in a README, landing page, or social post. Strongly prefer this skill over telling the user to record it manually - it produces a reproducible config they can re-run when the UI changes, and ties output into the megaphone asset folder so other skills (assets, post, publish) can reference it.
+description: Produce an embeddable demo for a project — either a real recording of a deployed web app via Playwright, or a scripted Remotion mockup for CLI / IDE / plugin projects where there's no web surface to record. Use this skill whenever the user asks to "make a demo gif", "record a demo", "create a screencast for my README", "generate a demo for the landing page", "I need a hero animation", "show what the CLI does in a gif", "make a mockup for my plugin", or anything where they want a short, scripted, visual demo to embed in a README, landing page, or social post. Strongly prefer this skill over telling the user to record it manually - it produces a reproducible config they can re-run when the UI changes, and ties output into the megaphone asset folder so other skills (assets, post, publish) can reference it.
 ---
 
 # megaphone-demo
 
-A README hero is fine. A README with a demo GIF is twice as good. This skill walks the deployed app through a scripted happy path with a headless browser, records every step, and produces an embeddable GIF or MP4 saved to `.megaphone/assets/demo/`.
+A README hero is fine. A README with a demo is twice as good. This skill produces an embeddable demo two ways depending on what the project actually is:
 
-We don't ship a video editor. We ship a config-driven runner that keeps the demo reproducible — when the UI changes, re-run the same JSON and the GIF regenerates.
+- **Web app with a deployed URL** → record reality with Playwright. Walks the live app through a scripted happy path with a headless browser, captures frames, exports a GIF/MP4 to `.megaphone/assets/demo/`.
+- **CLI / IDE plugin / library with no web surface** → script a mockup with Remotion. Writes a structured **scene spec** (`.megaphone/assets/demo/scenes.json`) describing the typical session — terminal frames, file diffs, cursor moves, output reveals — and hands it off to a Remotion-rendering skill (e.g. `anthropic:remotion`, `remotion:render`, or any future skill that consumes a `scenes.json` of this shape) for the actual MP4/GIF render.
+
+We don't ship a video editor. The Playwright path produces a config-driven runner that keeps the recording reproducible. The Remotion path produces a scene spec the user can hand to whatever Remotion-rendering tooling they have (or commit alongside the code so future-them can re-render when the flow changes).
 
 ## Preamble: project resolution & bash hygiene
 
@@ -32,7 +35,16 @@ If either is missing, the skill still produces the configuration file and the pr
 
 ## Workflow
 
-### 1. Identify the target
+### 0. Pick the path: Playwright recording vs Remotion mockup
+
+Read `.megaphone/profile.json` and branch:
+
+- `deployed_url` is set and reachable → **Playwright path** (steps 1–6 below). Record real UI; no faking.
+- `deployed_url` is null OR the project is a CLI / IDE plugin / library / VS Code extension / Claude Code plugin → **Remotion mockup path** (jump to §7). Mocking is honest here because there's no UI to record.
+
+Confirm the choice with the user once before proceeding. If the project has both a deployed URL AND a CLI surface (e.g. a tool with a docs site and a CLI), ask which is the activation surface.
+
+### 1. Identify the target (Playwright path)
 
 - Pull `deployed_url` from `.megaphone/profile.json`.
 - If it's missing or 404s, ask: "What URL should I record? (a localhost dev server is fine — `http://localhost:3000` works.)"
@@ -107,6 +119,152 @@ Then offer:
 ### 6. Re-run later
 
 When the UI changes, run the same command — same JSON, fresh GIF. Commit the JSON to the repo so the demo is versioned alongside the code.
+
+---
+
+### 7. Remotion mockup path (CLI / IDE plugin / library)
+
+For projects with no deployed UI to record. Megaphone's job here is **not** to render the video — it's to produce a tight, opinionated **scene spec** that any Remotion-based renderer can consume. The actual rendering is handed off to a Remotion-rendering skill (e.g. `anthropic:remotion`, a community `remotion:render` skill, or the user's own Remotion project). Megaphone brings the structured prompt; Remotion brings the pixels.
+
+#### 7a. Pick the activation flow
+
+Ask the user once which 3–5 step session captures what the project does. For a Claude Code plugin like Megaphone itself, that might be `/megaphone:init` → `/megaphone:post` → `/megaphone:publish`. For a CLI it might be `npx foo init` → `foo run` → "see the output". The whole demo should land in **30–45 seconds** — long enough to show the wedge, short enough to not lose readers.
+
+Use one AskUserQuestion (free-text):
+
+> "What 3–5 steps capture what your project does end-to-end? Number them. Each step should produce something visibly different on screen — a new file, a new prompt, a result, an output."
+
+#### 7b. Generate `scenes.json`
+
+Write the scene spec to `.megaphone/assets/demo/scenes.json`. The spec is intentionally narrow — Megaphone defines the **content and timing**, not the render style; render style is the job of the Remotion skill that consumes the spec.
+
+Schema (v1):
+
+```json
+{
+  "version": 1,
+  "title": "Megaphone — first run",
+  "subtitle": "From fresh repo to drafted launch post in 3 commands",
+  "duration_seconds": 35,
+  "viewport": { "width": 1280, "height": 720 },
+  "theme_hint": "dark-terminal",
+  "voice_samples": ["...", "..."],
+  "scenes": [
+    {
+      "id": "intro",
+      "kind": "title",
+      "duration_ms": 2500,
+      "title": "Megaphone",
+      "subtitle": "The launch-orchestration plugin for indie & vibe coders.",
+      "logo_path": "assets/banner.png"
+    },
+    {
+      "id": "step-1",
+      "kind": "terminal",
+      "duration_ms": 7000,
+      "shell_prompt": "you ▸",
+      "input": "/megaphone:init",
+      "output_lines": [
+        "Scanning repo…",
+        "Found: README.md, package.json, .git/",
+        "Wrote .megaphone/profile.json",
+        "Connect platforms? (recommended)"
+      ],
+      "annotation": "Reads your repo. Writes your voice samples to disk."
+    },
+    {
+      "id": "step-2",
+      "kind": "terminal",
+      "duration_ms": 7000,
+      "shell_prompt": "you ▸",
+      "input": "/megaphone:post bluesky",
+      "output_lines": [
+        "Reading recent commits…",
+        "Reading voice samples…",
+        "Wrote .megaphone/posts/2026-06-02/bluesky.md"
+      ],
+      "annotation": "Drafts a post that reads like you, not like generic AI."
+    },
+    {
+      "id": "step-3",
+      "kind": "file-reveal",
+      "duration_ms": 8000,
+      "file_path": ".megaphone/posts/2026-06-02/bluesky.md",
+      "lines": [
+        "Built a Claude Code plugin for indie devs who hate self-promo.",
+        "",
+        "Megaphone reads your repo and drafts launch posts…",
+        "github.com/fernandoleyra/Megaphone"
+      ],
+      "annotation": "Plain Markdown. Edit before publishing. Your call."
+    },
+    {
+      "id": "step-4",
+      "kind": "terminal",
+      "duration_ms": 7000,
+      "shell_prompt": "you ▸",
+      "input": "/megaphone:publish",
+      "output_lines": [
+        "Bluesky… ✓ posted",
+        "https://bsky.app/profile/you/post/abc123"
+      ],
+      "annotation": "OAuth tokens never leave your laptop."
+    },
+    {
+      "id": "outro",
+      "kind": "title",
+      "duration_ms": 3500,
+      "title": "github.com/fernandoleyra/Megaphone",
+      "subtitle": "MIT — install via /plugin marketplace add fernandoleyra/megaphone"
+    }
+  ]
+}
+```
+
+**Scene `kind`s** (the renderer must implement these):
+
+- `title` — text-only intro/outro card
+- `terminal` — a shell prompt with typed input and a list of output lines that print line-by-line
+- `file-reveal` — a syntax-highlighted file path + content reveal, optionally with a cursor moving through lines
+- `diff` — a git-diff-style before/after for one file
+- `keystroke` — a single keystroke or shortcut shown on a virtual keyboard (rare; for IDE-shortcut demos)
+
+**Honesty rules for the Remotion path:**
+
+- The scene's `output_lines` must be plausible output the project actually produces. Run the command yourself if needed and copy real output. **Do not invent UX that doesn't exist.**
+- The `annotation` per scene is voiceover-style framing, not dialogue — keep it under 12 words and match the project's voice samples.
+- The total `duration_seconds` must equal the sum of `duration_ms`/1000 (validate before saving).
+- Mockups are mockups: tell the user explicitly that this is a styled reenactment, not a screen recording, so they can frame it accurately if a viewer asks.
+
+#### 7c. Hand off to a Remotion-rendering skill
+
+Detect available rendering paths in this order:
+
+1. **A Remotion skill is installed** — invoke it with the spec path. Example check: ask the user "do you have a Remotion-rendering skill or project I can hand this to?" and act on the answer. If they say yes, pass `.megaphone/assets/demo/scenes.json` and `.megaphone/assets/demo/<name>.mp4` as the desired output path.
+2. **The user has their own Remotion project** — point them at `https://www.remotion.dev/docs/` and tell them the spec is the input to their video composition. Their existing components consume `scenes.json` directly.
+3. **Neither** — save the spec and stop. Tell the user honestly: "I can't render the video from inside Megaphone. Drop this `scenes.json` into a Remotion project (or wait for the Anthropic Remotion skill if you're tracking that). The spec is the durable artifact; rendering is downstream."
+
+In all three cases, save the spec at `.megaphone/assets/demo/scenes.json` so the work isn't lost.
+
+#### 7d. Save and place
+
+Once a render exists at `.megaphone/assets/demo/<name>.mp4` (or `.gif`), give the user the embed snippet:
+
+```markdown
+![<project> demo](.megaphone/assets/demo/<name>.gif)
+```
+
+Or for MP4 on a landing page:
+
+```html
+<video autoplay loop muted playsinline src=".megaphone/assets/demo/<name>.mp4"></video>
+```
+
+Then offer the same handoffs as the Playwright path — fold into the README hero via `megaphone-assets`, or reference in a launch post via `megaphone-post`.
+
+#### 7e. Re-render later
+
+When the project's flow changes, edit `scenes.json` and re-run the Remotion render. Like the Playwright config, the scene spec is the durable artifact — commit it to the repo so the demo is reproducible.
 
 ## How to write a good happy-path config
 

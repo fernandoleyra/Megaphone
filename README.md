@@ -13,7 +13,7 @@
   <a href="https://github.com/fernandoleyra/megaphone/stargazers"><img src="https://img.shields.io/github/stars/fernandoleyra/megaphone?style=flat-square" alt="Stars"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="MIT License"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-Plugin-8B5CF6?style=flat-square" alt="Claude Code Plugin">
-  <img src="https://img.shields.io/badge/version-0.7.6-orange?style=flat-square" alt="Version">
+  <img src="https://img.shields.io/badge/version-0.7.7-orange?style=flat-square" alt="Version">
 </p>
 
 ---
@@ -37,6 +37,39 @@ Then enable it: run `/plugin`, find **megaphone** in the list, and toggle it on.
 
 If skills or commands don't show up, run `/plugin` again and confirm megaphone is enabled, then `/reload-plugins`.
 
+## First run
+
+The fastest way to see Megaphone work: a 3-command session that takes you from "fresh repo" to "drafted launch post on disk."
+
+```
+You: I just built a thing. Help me ship it.
+Claude: [megaphone-init] → scans repo, asks for 1–3 voice samples, writes .megaphone/profile.json
+
+You: draft a Bluesky launch post
+Claude: [megaphone-post] → reads recent commits + voice samples, writes .megaphone/posts/<date>/bluesky.md
+
+You: publish it
+Claude: [megaphone-publish] → posts to your Bluesky (after you confirm), writes a receipt to .megaphone/published/
+```
+
+**You'll know Megaphone is working when** `.megaphone/profile.json` reads back your voice samples and the first post draft sounds like you, not like generic AI output. That's the activation moment.
+
+A fuller session — assets, outreach, audit, schedule — looks like this:
+
+```
+You: generate the assets
+Claude: [megaphone-assets] → tagline + hook + README hero + dev.to intro + banner-image prompt
+
+You: where should I submit and who should I DM?
+Claude: [megaphone-outreach] → 15 venues scored, 10 amplifiers found, personalized packets and DMs drafted
+
+You: pre-launch audit
+Claude: [megaphone-audit] → README/journey walkthrough + activation moment + ranked blockers
+
+You: schedule the launch sequence
+Claude: [megaphone-schedule] → one queue row per platform, fired locally on launch day
+```
+
 ## Slash commands
 
 | Command | What it does |
@@ -58,11 +91,11 @@ These auto-trigger when Claude detects a matching intent in your message. The ph
 |---|---|---|
 | `megaphone-init` | "set up megaphone", "init megaphone for this repo" | Scans your repo and writes `.megaphone/profile.json` capturing what your project is, who it's for, and how you sound. |
 | `megaphone-assets` | "generate marketing assets", "rewrite my README", "I need a banner" | One-liner, hook, README hero, dev.to intro, landing copy. Crafts banner-image prompts (NanoBanana / DALL·E). |
-| `megaphone-demo` | "make a demo gif", "record a demo" | Walks your deployed app through a 3–7 step happy path with Playwright, exports a GIF/MP4. |
+| `megaphone-demo` | "make a demo gif", "record a demo", "make a CLI mockup" | Two paths: real recordings of deployed web apps via Playwright, OR scripted Remotion mockups for CLI/IDE projects (hands a structured scene spec to a Remotion-rendering skill). |
 | `megaphone-post` | "draft a Show HN", "draft a Reddit r/SideProject post", "post on Indie Hackers" | **Community-aware drafting.** Reads each venue's culture before writing — Reddit per-sub, HN, IH, Peerlist, Hashnode + Bluesky, X, LinkedIn, Threads, Mastodon, dev.to. |
 | `megaphone-outreach` | "plan my launch", "find awesome-lists", "draft a DM to <person>" | Four phases: score venues → find amplifiers → draft personalized DMs + submission packets → build the 30/14/6/0-day launch plan. |
 | `megaphone-publish` | "publish my drafts", "post to bluesky", "ship the launch posts" | Drafts go live on the actual platform — Bluesky, LinkedIn, dev.to, Reddit, Mastodon, X, Hashnode. Local OAuth, tokens never leave your machine. |
-| `megaphone-schedule` | "schedule this for tuesday 10am", "set up the launch sequence" | One-offs, recurring cadences from a folder, coordinated launch-day sequences. |
+| `megaphone-schedule` | "schedule this for tuesday 10am", "set up the launch sequence" | One-offs, recurring cadences from a folder, coordinated launch-day sequences. Asks your preferred cadence (1-day blitz / 7-day sprint / 30-day plan / custom). |
 | `megaphone-audit` | "audit my landing page", "audit my user journey", "pre-launch audit" | Landing page (100-pt rubric) + journey audit (70-pt + three-persona walkthrough). Names the activation moment and ranks blockers. |
 | `megaphone-digest` | "weekly digest", "how's my project doing" | Stars delta, posts published, top performers, next best action. |
 
@@ -85,36 +118,30 @@ The trade-off: we don't do TikTok / Instagram / YouTube. **Megaphone is built fo
 - **Human-in-the-loop by default.** Every post is drafted to a file you can edit before publishing. Outreach DMs are never auto-sent.
 - **Repo-aware.** Skills read your README, manifests, recent commits, deployed URL, voice samples. The more you commit, the better the posts.
 - **Persistent.** Per-project state in `.megaphone/`, user-wide credentials in `~/.megaphone/credentials/` (chmod 0600). Survives across sessions. Credentials are managed via the short `megaphone-auth` command (auto-installed to `~/.local/bin` by `/megaphone:init`) — `megaphone-auth status`, `megaphone-auth connect <platform>`, `megaphone-auth disconnect <platform>`.
-- **Stdlib-only Python.** No `pip install` for the core. Demo GIFs need Playwright + ffmpeg (one-time).
+- **Stdlib-only Python.** No `pip install` for the core. Demo GIFs need Playwright + ffmpeg (one-time) — or, for CLI projects, hand off to a Remotion-rendering skill.
 - **Honest about platform rules.** HN, awesome-lists, Reddit promo rules, X auto-replies — Megaphone says plainly what's automatable and what isn't.
 
-## Typical first session
+## Roadmap
 
-```
-You: I just built a thing. Help me ship it.
-Claude: [megaphone-init] → scans repo, writes .megaphone/profile.json
+Concrete next-version targets. Open issues to influence priority.
 
-You: generate the assets
-Claude: [megaphone-assets] → banner prompt + hook + README hero + dev.to intro
+- **0.8 — Demo path for CLI projects.** Hand off a structured scene spec to a Remotion-rendering skill so plugin/CLI projects get an embeddable mockup demo without Playwright.
+- **0.8 — Custom launch cadences.** `megaphone-schedule` and `megaphone-outreach` accept 1-day blitz / 7-day sprint / 30-day plan / custom timelines instead of the hardcoded 30/14/6/0.
+- **0.9 — Threads connector.** Add Threads (Meta) to the per-platform connector layer.
+- **0.9 — Launch-week analytics in `/megaphone:digest`.** Hour-level traction view for the first 72h after launch.
+- **1.0 — `megaphone-publish` retries.** Smarter exponential backoff + dead-letter queue for posts that exhaust their retry budget.
 
-You: where should I submit and who should I DM?
-Claude: [megaphone-outreach] → 15 venues scored, 10 amplifiers, personalized packets
+Want to nudge an item up? Open an issue with a use case.
 
-You: draft a Show HN and an r/SideProject post
-Claude: [megaphone-post] → reads HN posture and r/SideProject culture, drafts both
+## Changelog
 
-You: publish the Bluesky one, schedule LinkedIn for Tuesday 10am
-Claude: [megaphone-publish + megaphone-schedule]
-
-You: pre-launch audit
-Claude: [megaphone-audit] → landing rubric + journey walkthrough + activation moment
-```
+See [CHANGELOG.md](CHANGELOG.md) for the per-version history.
 
 ## Requirements
 
 - **Claude Code** (latest)
 - **Python 3.10+** (stdlib only — no pip install for the core)
-- **Optional:** Playwright + ffmpeg (only if you use `megaphone-demo` for GIFs)
+- **Optional:** Playwright + ffmpeg (only if you use `megaphone-demo` for web-app GIFs)
 
 ## ⭐ Star this repo
 

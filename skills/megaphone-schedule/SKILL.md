@@ -146,6 +146,39 @@ To stop generating new files for a cadence: drop new drafts into the folder. To 
 
 ### 4. Schedule a launch sequence
 
+#### 4a. Ask the user for a launch cadence
+
+Before reading or generating `sequence.json`, ask the user **once** which launch cadence they want. The cadence shapes both the build-up timeline and how the auto-publishable platforms stagger on launch day. Use one AskUserQuestion (single-select):
+
+> Which launch cadence fits your project?
+>
+> - **1-day blitz** — single-day launch. Everything fires within a 4-6 hour window. Best for tiny side projects, mood-boards, or shipping under deadline. Skip the warm-up; just go.
+> - **7-day sprint** — one week of warm-up, post on Day 0. Tease 4 days out, polish 2 days out, ship. Best for solo devs with a working product but no audience to warm.
+> - **30-day plan (Recommended)** — full 30/14/6/0 cadence with amplifier outreach, awesome-list submissions, build-in-public posts, and a coordinated Day 0 sequence. Best for OSS / dev tools / anything aiming at Show HN or Product Hunt.
+> - **Different timing** — user free-text answer; let them describe their constraint (e.g. "we ship in 10 days", "this is launching alongside a conference talk on 2026-09-12").
+
+Save the chosen cadence to `.megaphone/schedule/cadence.json`:
+
+```json
+{
+  "cadence": "30d" | "7d" | "1d" | "custom",
+  "anchor_date": "2026-06-02",
+  "timezone": "America/Los_Angeles",
+  "custom_notes": "..."
+}
+```
+
+The cadence is read by `megaphone-outreach` Phase 4 (the launch-plan generator) so the dated checklist matches the chosen window — no more hardcoded 30/14/6/0 when the user is shipping in 7 days.
+
+For the **1-day blitz**, default Day-0 stagger is 30 minutes between auto-publishable platforms.
+For the **7-day sprint**, default Day-0 stagger is 60 minutes (more spacing because the warm-up was thinner).
+For the **30-day plan**, default Day-0 stagger is 60–90 minutes (the launch plan handles outreach separately, so launch-day has air to breathe).
+For **custom**, ask once for the desired Day-0 spacing.
+
+If `sequence.json` already exists from a prior planning pass, surface it and ask whether to use it as-is or re-generate against the chosen cadence.
+
+#### 4b. Import the sequence
+
 ```bash
 python3 schedule.py add-sequence --file .megaphone/launch/sequence.json
 ```
