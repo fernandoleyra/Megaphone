@@ -7,10 +7,8 @@
       "name": "megaphone",
       "description": "Local-first launch-orchestration toolkit for vibe coders.",
       "source": {
-        "source": "git-subdir",
-        "url": "https://github.com/fernandoleyra/megaphone.git",
-        "path": ".",
-        "ref": "main"
+        "source": "url",
+        "url": "https://github.com/fernandoleyra/megaphone.git"
       }
     }
   ]
