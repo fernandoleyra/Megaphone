@@ -1,6 +1,6 @@
 {
   "name": "megaphone",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Local-first launch-orchestration toolkit for vibe coders. Nine focused skills + six slash commands - init the project profile, generate copy/banner/demo assets, draft community-aware posts (Reddit per-sub, Show HN, Indie Hackers, Peerlist, Hashnode + feed platforms), run outreach (venues, amplifiers, personalized DMs, 30/14/6/0-day launch plan), publish locally to 7 platforms, schedule one-offs/cadences/launch sequences, audit the landing page and user journey, and track traction. No SaaS in the middle.",
   "author": {
     "name": "Fernando Leyra"
