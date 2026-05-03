@@ -6,10 +6,7 @@
     {
       "name": "megaphone",
       "description": "Local-first launch-orchestration toolkit for vibe coders.",
-      "source": {
-        "source": "url",
-        "url": "https://github.com/fernandoleyra/megaphone.git"
-      }
+      "source": "./"
     }
   ]
 }
