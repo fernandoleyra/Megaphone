@@ -30,6 +30,7 @@ import os
 import subprocess
 import sys
 import uuid
+import zoneinfo
 from pathlib import Path
 from typing import Optional
 
@@ -200,12 +201,19 @@ def cmd_add_sequence(args) -> None:
         sys.exit("ERROR: sequence JSON must have 'name' and 'items'.")
     anchor = _dt.date.fromisoformat(spec["anchor_date"])
     tzname = spec.get("timezone")
+    if tzname:
+        try:
+            tz = zoneinfo.ZoneInfo(tzname)
+        except zoneinfo.ZoneInfoNotFoundError:
+            sys.exit(f"ERROR: unknown timezone {tzname!r} in sequence file.")
+    else:
+        tz = _now().tzinfo
     items_added = []
     queue = _read_json(queue_path(args.cwd), [])
     for entry in spec["items"]:
         h, _, mm = entry["offset"].partition(":")
         offset = _dt.timedelta(hours=int(h), minutes=int(mm or 0))
-        when = _dt.datetime.combine(anchor, _dt.time(0, 0), tzinfo=_now().tzinfo) + offset
+        when = _dt.datetime.combine(anchor, _dt.time(0, 0), tzinfo=tz) + offset
         item = {
             "id": _new_id(),
             "platform": entry["platform"],

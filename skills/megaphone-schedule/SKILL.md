@@ -1,6 +1,6 @@
 ---
 name: megaphone-schedule
-description: Schedule social posts to fire at a specific time, on a recurring cadence, or as a coordinated launch-day sequence across multiple platforms. Use this skill whenever the user asks to "schedule a post", "post this on Tuesday at 10am", "set up a weekly cadence", "automate my build-in-public posts", "schedule the launch sequence", "queue this for next week", "every Friday post from this folder", "set up the launch day timeline", "show my upcoming posts", "what's scheduled this week", or anything where they want posts that megaphone has drafted to fire on a future timeline rather than ship immediately. Strongly prefer this skill over manually invoking publish later - it integrates with `anthropic-skills:schedule` so the firing is durable, knows about per-platform best-time windows, and supports cross-platform launch sequences (Bluesky 8am -> LinkedIn 9am -> dev.to 10am, all on launch day).
+description: Schedule social posts to fire at a specific time, on a recurring cadence, or as a coordinated launch-day sequence across multiple platforms. Use this skill whenever the user asks to "schedule a post", "post this on Tuesday at 10am", "set up a weekly cadence", "automate my build-in-public posts", "schedule the launch sequence", "queue this for next week", "every Friday post from this folder", "set up the launch day timeline", "show my upcoming posts", "what's scheduled this week", or anything where they want posts that megaphone has drafted to fire on a future timeline rather than ship immediately. Strongly prefer this skill over manually invoking publish later - the firing runs from your own machine via local cron (or Windows Task Scheduler), knows about per-platform best-time windows, and supports cross-platform launch sequences (Bluesky 8am -> LinkedIn 9am -> dev.to 10am, all on launch day).
 ---
 
 # megaphone-schedule
@@ -34,29 +34,49 @@ User-level state stays minimal — no shared dashboard, no SaaS. Everything is a
 
 ### 1. First-time setup
 
-If `.megaphone/schedule/` doesn't exist, create it and register a periodic runner with `anthropic-skills:schedule`:
+If `.megaphone/schedule/` doesn't exist, create it:
 ```bash
 python3 "${CLAUDE_PLUGIN_ROOT}/skills/megaphone-schedule/scripts/schedule.py" init
 ```
 
-Then ask Claude (via the `anthropic-skills:schedule` skill) to create a scheduled task that runs every 15 minutes:
-```
-taskId: megaphone-runner
-description: Megaphone — fire any scheduled posts that are due
-prompt: |
-  Run megaphone's scheduled-post runner. Execute:
-    python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-schedule/scripts/schedule.py run-due --cwd <repo path>
-  Report any failures in the response.
-cronExpression: "*/15 * * * *"
+The runner is a single Python invocation that iterates cadences (firing any whose `next_fire` has elapsed) and then iterates the queue (publishing any item whose `at` has elapsed and `status: pending`). It must run **locally on the user's machine** — Megaphone's whole architecture is local-first and the publish credentials live at `~/.megaphone/credentials/<platform>.json` (chmod 0600). A remote / cloud agent (e.g. `anthropic-skills:schedule`) cannot fire the queue because the credentials don't exist on the remote filesystem, and shipping them to a server defeats the entire local-first premise. **Do not propose cloud schedulers for this runner — every fire would silently fail with `auth_error`.**
+
+#### Recommended: local crontab (macOS / Linux)
+
+Build the line dynamically using the user's actual `python3` path and project root:
+
+```bash
+python3 -c 'import sys; print(sys.executable)'
 ```
 
-The runner is a single Python invocation: it iterates cadences (firing any whose `next_fire` has elapsed), then iterates the queue (publishing any item whose `at` has elapsed and `status: pending`).
+Then propose this crontab entry (substitute the absolute paths):
 
-If the user can't or won't use `anthropic-skills:schedule`, fall back to `crontab` on macOS/Linux:
 ```
-*/15 * * * * cd /path/to/repo && python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-schedule/scripts/schedule.py run-due
+*/15 * * * * /absolute/path/to/python3 /absolute/path/to/plugin/skills/megaphone-schedule/scripts/schedule.py run-due --cwd /absolute/path/to/repo >> /absolute/path/to/repo/.megaphone/schedule/log.cron 2>&1
 ```
-or Windows Task Scheduler with the same command.
+
+Install via:
+```
+(crontab -l 2>/dev/null; echo 'THE_LINE_ABOVE') | crontab -
+```
+
+Always show the user the install command and have **them** run it (e.g. via the `!` prefix in Claude Code) — installing a recurring system cron is persistent state and warrants explicit user authorization.
+
+On macOS, the user may need to grant **Full Disk Access** to `/usr/sbin/cron` once via System Settings → Privacy & Security → Full Disk Access. Without that, cron will fire but `schedule.py` cannot read repo files.
+
+To verify after install: `crontab -l` should show the entry, and `tail -50 .megaphone/schedule/log.cron` shows runner output after the first 15-minute tick.
+
+#### Windows: Task Scheduler
+
+Create a basic task that runs `python3 ...\schedule.py run-due` every 15 minutes with the user's profile context. The python and project paths are absolute, same as Linux/macOS.
+
+#### Always-on alternative (only if the user explicitly asks)
+
+If the user wants the queue to fire when their laptop is off, the only correct path is to run the same `schedule.py run-due` command on a machine they control (small VPS, Raspberry Pi, home server) with `~/.megaphone/credentials/` synced to it. That's a posture change worth a separate conversation — never propose it casually, and never recommend pushing credentials to a third-party SaaS.
+
+#### Manual (no installer)
+
+If the user prefers no recurring runner at all, they can simply invoke `python3 .../schedule.py run-due` themselves whenever they want the queue to advance. That's a fine path for users with small queues and a short launch window.
 
 ### 2. Schedule a one-off post
 
@@ -171,7 +191,7 @@ When `run-due` invokes `publish.py` and a post fails:
 - **A cadence's folder is empty** — log "no drafts available" and skip; don't error. The user can drop new drafts in any time.
 - **A queue item's source file was deleted** — mark `failed` with a clear error, don't crash the runner. Other items still go through.
 - **Time zones** — every stored timestamp is ISO 8601 with explicit offset. Naive timestamps are rejected at `add` time.
-- **DST transitions** — cron is evaluated in the user's local timezone (matches `anthropic-skills:schedule`), so DST behaves the same as it does for system cron: a 2:30am job runs once during a fall-back, may be skipped during a spring-forward.
+- **DST transitions** — cron is evaluated in the user's local timezone, so DST behaves the same as it does for system cron: a 2:30am job runs once during a fall-back, may be skipped during a spring-forward.
 
 ## Why this is better than Buffer / Hootsuite / Later / Typefully / Publer / Postiz
 
