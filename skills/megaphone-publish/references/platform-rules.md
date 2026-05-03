@@ -110,7 +110,7 @@ Override example:
 
 Allowed visibility values: `PUBLIC`, `CONNECTIONS`.
 
-Token refresh: handled automatically. If a refresh fails, dispatcher surfaces `refresh_token` error and the user must run `auth.py connect linkedin` again.
+Token refresh: handled automatically. If a refresh fails, dispatcher surfaces `refresh_token` error and the user must run `megaphone-auth connect linkedin` again.
 
 Returns URL: `https://www.linkedin.com/feed/update/urn:li:share:<id>/`.
 

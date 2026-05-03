@@ -6,11 +6,15 @@ Subcommands:
   connect <platform>       Run the platform's interactive auth flow.
   disconnect <platform>    Delete the saved credentials.
 
-Examples:
+Examples (preferred — short wrapper installed by `megaphone-init` §6.0):
+  megaphone-auth status
+  megaphone-auth status bluesky
+  megaphone-auth connect bluesky
+  megaphone-auth disconnect linkedin
+
+Examples (long form — works without the wrapper):
   python3 auth.py status
-  python3 auth.py status bluesky
   python3 auth.py connect bluesky
-  python3 auth.py disconnect linkedin
 
 Credentials live at ~/.megaphone/credentials/<platform>.json (chmod 0600)."""
 

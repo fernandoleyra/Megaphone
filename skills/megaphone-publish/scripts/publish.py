@@ -63,7 +63,7 @@ def main() -> None:
     creds = load_credentials(args.platform)
     if not creds:
         fail(
-            f"No credentials for {args.platform}. Run: python3 auth.py connect {args.platform}",
+            f"No credentials for {args.platform}. Run: megaphone-auth connect {args.platform}",
         )
 
     try:
@@ -102,7 +102,7 @@ def main() -> None:
             result = module.publish(body, refreshed, merged_overrides)
         else:
             info(
-                f"{args.platform}: refresh failed; reconnect with `python3 auth.py connect {args.platform}`",
+                f"{args.platform}: refresh failed; reconnect with `megaphone-auth connect {args.platform}`",
             )
 
     # Auto-handle one rate-limit retry, capped at 90 seconds wait.

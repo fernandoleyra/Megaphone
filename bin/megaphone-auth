@@ -1,0 +1,37 @@
+#!/bin/sh
+# megaphone-auth — short wrapper around the auth helper.
+#
+# Self-resolving: finds the auth.py adjacent to itself via dirname, so this
+# script works whether invoked directly from the plugin source tree or via a
+# symlink. For the upgrade-resilient version installed to ~/.local/bin by
+# `megaphone-init` §6.0, see the inline installer in that skill — it writes a
+# different wrapper that globs ~/.claude/plugins/cache/ to track plugin
+# upgrades automatically.
+#
+# Usage:
+#   megaphone-auth status
+#   megaphone-auth status bluesky
+#   megaphone-auth connect bluesky
+#   megaphone-auth disconnect linkedin
+
+SOURCE="$0"
+# Resolve symlink chain (POSIX-portable; macOS readlink lacks -f).
+while [ -L "$SOURCE" ]; do
+  DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  case "$SOURCE" in
+    /*) ;;
+    *) SOURCE="$DIR/$SOURCE" ;;
+  esac
+done
+BIN_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+PLUGIN_ROOT="$(dirname "$BIN_DIR")"
+AUTH="$PLUGIN_ROOT/skills/megaphone-publish/scripts/auth.py"
+
+if [ ! -f "$AUTH" ]; then
+  echo "megaphone-auth: auth.py not found at $AUTH" >&2
+  echo "  (expected layout: <plugin-root>/bin/megaphone-auth + <plugin-root>/skills/megaphone-publish/scripts/auth.py)" >&2
+  exit 1
+fi
+
+exec python3 "$AUTH" "$@"

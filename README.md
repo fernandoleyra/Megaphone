@@ -84,7 +84,7 @@ The trade-off: we don't do TikTok / Instagram / YouTube. **Megaphone is built fo
 
 - **Human-in-the-loop by default.** Every post is drafted to a file you can edit before publishing. Outreach DMs are never auto-sent.
 - **Repo-aware.** Skills read your README, manifests, recent commits, deployed URL, voice samples. The more you commit, the better the posts.
-- **Persistent.** Per-project state in `.megaphone/`, user-wide credentials in `~/.megaphone/credentials/` (chmod 0600). Survives across sessions.
+- **Persistent.** Per-project state in `.megaphone/`, user-wide credentials in `~/.megaphone/credentials/` (chmod 0600). Survives across sessions. Credentials are managed via the short `megaphone-auth` command (auto-installed to `~/.local/bin` by `/megaphone:init`) — `megaphone-auth status`, `megaphone-auth connect <platform>`, `megaphone-auth disconnect <platform>`.
 - **Stdlib-only Python.** No `pip install` for the core. Demo GIFs need Playwright + ffmpeg (one-time).
 - **Honest about platform rules.** HN, awesome-lists, Reddit promo rules, X auto-replies — Megaphone says plainly what's automatable and what isn't.
 

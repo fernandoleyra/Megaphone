@@ -193,12 +193,55 @@ Keep the suggestion to one line. **Before ending the turn, also walk the user th
 
 Megaphone publishes locally — no SaaS in the middle, credentials live in `~/.megaphone/credentials/<id>.json` (chmod 0600), shared across every project on this machine. Connect once, use everywhere.
 
+#### 6.0. Install the `megaphone-auth` wrapper (idempotent)
+
+Before any auth call, ensure the short `megaphone-auth` command is on the user's PATH. The wrapper is a tiny shell script at `~/.local/bin/megaphone-auth` that resolves the latest installed plugin version under `~/.claude/plugins/cache/` and exec's its `auth.py`. Without it, every auth invocation is a 130-character path that fragile terminals split on paste — which has burned real users.
+
+Probe and install in one Bash call:
+
+```bash
+sh -c '
+  WRAPPER="$HOME/.local/bin/megaphone-auth"
+  mkdir -p "$HOME/.local/bin"
+  if [ ! -x "$WRAPPER" ] || ! grep -q "MEGAPHONE_WRAPPER_V1" "$WRAPPER" 2>/dev/null; then
+    cat > "$WRAPPER" <<"EOF"
+#!/bin/sh
+# MEGAPHONE_WRAPPER_V1 — finds the latest installed megaphone plugin in
+# ~/.claude/plugins/cache/megaphone/megaphone/ and execs its auth.py.
+# Survives plugin version bumps automatically.
+CACHE="$HOME/.claude/plugins/cache/megaphone/megaphone"
+[ -d "$CACHE" ] || { echo "megaphone-auth: plugin not installed at $CACHE" >&2; exit 1; }
+LATEST=$(ls -1 "$CACHE" 2>/dev/null | sort -V | tail -1)
+[ -n "$LATEST" ] || { echo "megaphone-auth: no installed versions found in $CACHE" >&2; exit 1; }
+AUTH="$CACHE/$LATEST/skills/megaphone-publish/scripts/auth.py"
+[ -f "$AUTH" ] || { echo "megaphone-auth: auth.py not found at $AUTH" >&2; exit 1; }
+exec python3 "$AUTH" "$@"
+EOF
+    chmod +x "$WRAPPER"
+    echo "INSTALLED $WRAPPER"
+  else
+    echo "ALREADY_INSTALLED $WRAPPER"
+  fi
+  case ":$PATH:" in
+    *":$HOME/.local/bin:"*) echo "PATH_OK" ;;
+    *) echo "PATH_MISSING — user needs to add ~/.local/bin to PATH" ;;
+  esac
+  exit 0
+'
+```
+
+If the probe reports `PATH_MISSING`, tell the user one line:
+
+> Add `~/.local/bin` to your PATH so `megaphone-auth` is callable from anywhere. Run once: `echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc && source ~/.zshrc` (or the equivalent for bash/fish). Or just call `~/.local/bin/megaphone-auth` directly until you do.
+
+After this step, every auth invocation in the rest of §6 (and §6.1) uses the short `megaphone-auth ...` form.
+
 #### 6a. Show the current status
 
 Run the auth helper and parse its JSON output:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py status
+megaphone-auth status
 ```
 
 The output is a single JSON line: `{"platforms": [{"platform": "<id>", "connected": <bool>, "since": "<ISO8601 or null>", "expired": <bool>}, ...]}`. Render it as a markdown table:
@@ -229,7 +272,7 @@ Use the canonical IDs from `skills/megaphone-publish/references/platform-ids.md`
 For each chosen platform:
 
 ```bash
-python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py connect <id>
+megaphone-auth connect <id>
 ```
 
 Stream stdout and stderr to the user — the connector prints platform-specific instructions, opens the browser for OAuth where applicable, or prompts for a token paste. Wait for it to finish before moving to the next platform.
@@ -250,9 +293,9 @@ Re-run the status command and render the updated table. End with a one-line conf
 
 These three actions cover every post-init scenario:
 
-- **Check status:** re-invoke `/megaphone-init` and pick `manage connections` from §1's existing-profile menu, or run `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py status` from anywhere.
-- **Reconnect a failed or expired platform:** `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py connect <id>` — overwrites the existing credentials. Or invoke `/megaphone-publish` and ask to reconnect; it offers the same flow as a fallback.
-- **Remove a connection:** `python3 ${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py disconnect <id>` — deletes the credential file. Also remove the `<id>` from `platforms.connected[]` in the project's `.megaphone/profile.json`.
+- **Check status:** re-invoke `/megaphone-init` and pick `manage connections` from §1's existing-profile menu, or run `megaphone-auth status` from anywhere.
+- **Reconnect a failed or expired platform:** `megaphone-auth connect <id>` — overwrites the existing credentials. Or invoke `/megaphone-publish` and ask to reconnect; it offers the same flow as a fallback.
+- **Remove a connection:** `megaphone-auth disconnect <id>` — deletes the credential file. Also remove the `<id>` from `platforms.connected[]` in the project's `.megaphone/profile.json`.
 
 Two important truths to surface to the user during init:
 

@@ -2,9 +2,9 @@
 
 How to connect each platform that megaphone-publish supports. Times listed are how long this takes a first-time user.
 
-Credentials are stored locally at `~/.megaphone/credentials/<platform>.json` (chmod 0600). Nothing leaves your machine. To delete: `python3 auth.py disconnect <platform>`.
+Credentials are stored locally at `~/.megaphone/credentials/<platform>.json` (chmod 0600). Nothing leaves your machine. To delete: `megaphone-auth disconnect <platform>`.
 
-The interactive flow is run by `auth.py connect <platform>`; this file is reference material — read it when the user asks why they need to register an OAuth app or what scope to choose.
+The interactive flow is run by `megaphone-auth connect <platform>`; this file is reference material — read it when the user asks why they need to register an OAuth app or what scope to choose.
 
 ---
 
@@ -16,7 +16,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 1. Open https://bsky.app/settings/app-passwords
 2. Click "Add App Password", give it a name like "megaphone".
 3. Copy the password (shown only once).
-4. Run `auth.py connect bluesky` and paste your handle (e.g. `fernando.bsky.social`) and the app password.
+4. Run `megaphone-auth connect bluesky` and paste your handle (e.g. `fernando.bsky.social`) and the app password.
 
 **Stored:** `{handle, app_password}`. Validated by creating a session against `bsky.social`.
 
@@ -30,7 +30,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 1. Open https://dev.to/settings/extensions
 2. Scroll to "DEV Community API Keys", click "Generate API Key", give it a name.
 3. Copy the key.
-4. Run `auth.py connect devto` and paste the key.
+4. Run `megaphone-auth connect devto` and paste the key.
 
 **Stored:** `{api_key}`. Used as the `api-key` header.
 
@@ -45,7 +45,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 2. Preferences → Development → "New application".
 3. Name: "Megaphone". Scopes: enable `write:statuses` (others optional).
 4. Save. Open the application, copy the value labelled "Your access token".
-5. Run `auth.py connect mastodon` and paste the instance hostname + the token.
+5. Run `megaphone-auth connect mastodon` and paste the instance hostname + the token.
 
 **Stored:** `{instance, access_token}`. Posts go to `https://<instance>/api/v1/statuses`.
 
@@ -59,7 +59,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 1. Open https://hashnode.com/settings/developer
 2. Click "Generate New Token", give it a name.
 3. Copy the token.
-4. Run `auth.py connect hashnode` and paste the token. The script then queries Hashnode for the publications on your account and asks which one to use as the default; that publication's ID is stored alongside the token.
+4. Run `megaphone-auth connect hashnode` and paste the token. The script then queries Hashnode for the publications on your account and asks which one to use as the default; that publication's ID is stored alongside the token.
 
 **Stored:** `{token, publication_id}`. Used as the `Authorization` header against `gql.hashnode.com`.
 
@@ -78,7 +78,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 4. Open the app → Auth tab → "OAuth 2.0 settings" → add redirect URL: `http://localhost:8765/megaphone/oauth/callback`.
 5. Open the Products tab → request both **Sign In with LinkedIn using OpenID Connect** and **Share on LinkedIn**. These are auto-approved (no manual review).
 6. Back to Auth tab → copy "Client ID" and "Primary Client Secret".
-7. Run `auth.py connect linkedin`. Paste the IDs; a browser window will open to authorize the app on your account; on success, the redirect closes the loop and the script saves tokens.
+7. Run `megaphone-auth connect linkedin`. Paste the IDs; a browser window will open to authorize the app on your account; on success, the redirect closes the loop and the script saves tokens.
 
 **Stored:** `{client_id, client_secret, access_token, refresh_token, expires_at, person_urn}`. Tokens are valid for 60 days; megaphone refreshes automatically.
 
@@ -95,7 +95,7 @@ The interactive flow is run by `auth.py connect <platform>`; this file is refere
 2. Click "are you a developer? create an app".
 3. Type: **web app**. Name: anything. About URL: any (Reddit accepts blanks but warns). Redirect URI: `http://localhost:8765/megaphone/oauth/callback`. Click "create app".
 4. The card now shows your **client ID** (small text below the app name) and **secret** (next to "secret"). Copy both.
-5. Run `auth.py connect reddit`. Paste the IDs; browser will authorize; tokens get saved.
+5. Run `megaphone-auth connect reddit`. Paste the IDs; browser will authorize; tokens get saved.
 
 **Stored:** `{client_id, client_secret, access_token, refresh_token, expires_at}`. Reddit access tokens expire in 1 hour; refresh tokens are permanent.
 
@@ -123,7 +123,7 @@ Optional fields: `flair_id`, `nsfw`, `title` (otherwise the first non-blank line
    - Website URL: any
 3. Choose "Confidential client" (recommended) and generate a client secret. Public-client (no secret) also works.
 4. Copy Client ID and Client Secret.
-5. Run `auth.py connect x`. Paste IDs; browser will open the X authorize page. After consent, tokens are saved.
+5. Run `megaphone-auth connect x`. Paste IDs; browser will open the X authorize page. After consent, tokens are saved.
 6. The script asks for your X handle (without @) so result URLs look right.
 
 **Stored:** `{client_id, client_secret, access_token, refresh_token, expires_at, username}`. Access tokens last 2 hours; megaphone refreshes automatically.

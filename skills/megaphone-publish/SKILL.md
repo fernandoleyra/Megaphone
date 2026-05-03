@@ -33,13 +33,15 @@ If the user named a specific platform ("post to bluesky"), narrow to just that c
 
 For each target platform, run:
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py" status <platform>
+megaphone-auth status <platform>
 ```
 
 This returns `connected` or `missing`. For any platform that's missing credentials, run the interactive auth flow:
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py" connect <platform>
+megaphone-auth connect <platform>
 ```
+
+(`megaphone-auth` is the wrapper installed by `megaphone-init` §6.0. If it's not on PATH, fall back to `python3 "${CLAUDE_PLUGIN_ROOT}/skills/megaphone-publish/scripts/auth.py" <subcommand>` — same script, longer path.)
 
 The auth script prints platform-specific instructions (where to get an app password, how to register an OAuth app, etc.), then prompts the user to paste the relevant token or completes a localhost OAuth dance. Read `references/auth-setup.md` if the user asks how each platform's auth works.
 
@@ -89,10 +91,10 @@ This is what `megaphone-digest` reads to count "posts shipped this week" — cur
 ### 6. Tell the user
 
 For each platform that succeeded, paste the live URL. For each that failed, paste the error and one-line guidance on what to do next:
-- `refresh_token` failed → "Token expired and refresh failed; run `auth.py connect <platform>` to re-auth."
+- `refresh_token` failed → "Token expired and refresh failed; run `megaphone-auth connect <platform>` to re-auth."
 - `bad_body` → "The platform rejected the post (often character limit or formatting). Edit the draft and retry."
 - `rate_limit` → "Hit the platform's rate limit; try again after <duration>."
-- `auth_error` → "Credentials seem invalid; reconnect with `auth.py connect <platform>`."
+- `auth_error` → "Credentials seem invalid; reconnect with `megaphone-auth connect <platform>`."
 - generic → quote the message verbatim.
 
 End with one suggested next move: if all succeeded, run `megaphone-digest` next week. If some failed, fix and retry the specific platform.
