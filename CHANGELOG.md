@@ -4,6 +4,12 @@ All notable changes to Megaphone are tracked here. The project follows
 [semantic versioning](https://semver.org/) — minor version bumps add features,
 patch versions fix bugs, breaking changes wait for the next major.
 
+## [0.7.9] — 2026-05-03
+
+### Fixed
+- `megaphone-schedule` install script template put `--cwd <repo>` *after* the `run-due` subcommand. argparse declares `--cwd` at the top-level parser, so that order produces `error: unrecognized arguments: --cwd <repo>` and the runner fails every fire. SKILL.md and the install scripts now place `--cwd` before the subcommand. Caught by examining the launchd log on a real install — the agent had been silently failing every 15 minutes since setup.
+- Install scripts now resolve the runner path to the latest installed plugin version (`ls -1d ~/.claude/plugins/cache/megaphone/megaphone/* | sort -V | tail -1`) instead of hardcoding the version that was current at install time. This means the launchd plist / cron entry survives plugin version bumps without needing to be reinstalled.
+
 ## [0.7.8] — 2026-05-03
 
 ### Fixed
@@ -59,6 +65,7 @@ patch versions fix bugs, breaking changes wait for the next major.
 - All skills include the project-resolution preamble — never assume `$HOME` is the project; resolve target via `.git/`, `package.json`, or memory candidates.
 - Standardized launch artifacts under `.megaphone/launch/` (plus `bash hygiene` exit-zero probe rules so first-run errors don't show red blocks).
 
+[0.7.9]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.8...v0.7.9
 [0.7.8]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.5...v0.7.6

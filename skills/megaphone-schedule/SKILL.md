@@ -53,7 +53,9 @@ Then pick the platform path. **On macOS, prefer launchd** (more reliable than cr
 
 `launchd` is Apple's native scheduler. It runs in the user's login session, doesn't require Full Disk Access for `/usr/sbin/cron`, survives reboot natively, and writes logs to a path you control.
 
-Generate a minimal install script at `<repo>/.megaphone/schedule/install-launchd.sh` that writes a LaunchAgent plist to `~/Library/LaunchAgents/com.megaphone.runner.plist` and loads it via `launchctl load -w`. The plist must use `StartInterval: 900` (15-minute interval), `ProgramArguments` with the absolute python path + runner script + `run-due` + `--cwd <repo>`, and `StandardOutPath` / `StandardErrorPath` pointing at `<repo>/.megaphone/schedule/log.cron`.
+Generate a minimal install script at `<repo>/.megaphone/schedule/install-launchd.sh` that writes a LaunchAgent plist to `~/Library/LaunchAgents/com.megaphone.runner.plist` and loads it via `launchctl load -w`. The plist must use `StartInterval: 900` (15-minute interval), `ProgramArguments` with the absolute python path + runner script + **`--cwd <repo>` + `run-due`** (in this order — `--cwd` is a top-level flag and must come *before* the subcommand or argparse rejects it), and `StandardOutPath` / `StandardErrorPath` pointing at `<repo>/.megaphone/schedule/log.cron`.
+
+Also: resolve `RUNNER` to the **latest installed plugin version** rather than hardcoding (e.g. `RUNNER=$(ls -1d "$HOME"/.claude/plugins/cache/megaphone/megaphone/* | sort -V | tail -1)/skills/megaphone-schedule/scripts/schedule.py`) so the plist survives plugin version bumps without needing reinstallation.
 
 Have the user run the script with the `!` prefix:
 
@@ -77,8 +79,10 @@ To uninstall: `launchctl unload ~/Library/LaunchAgents/com.megaphone.runner.plis
 #### Linux: crontab
 
 ```
-*/15 * * * * /absolute/path/to/python3 /absolute/path/to/plugin/skills/megaphone-schedule/scripts/schedule.py run-due --cwd /absolute/path/to/repo >> /absolute/path/to/repo/.megaphone/schedule/log.cron 2>&1
+*/15 * * * * /absolute/path/to/python3 /absolute/path/to/plugin/skills/megaphone-schedule/scripts/schedule.py --cwd /absolute/path/to/repo run-due >> /absolute/path/to/repo/.megaphone/schedule/log.cron 2>&1
 ```
+
+(`--cwd` is a top-level flag and must precede the `run-due` subcommand — argparse will reject `run-due --cwd <repo>` with "unrecognized arguments".)
 
 Install via:
 ```
