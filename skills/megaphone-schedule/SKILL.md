@@ -41,15 +41,40 @@ python3 "${CLAUDE_PLUGIN_ROOT}/skills/megaphone-schedule/scripts/schedule.py" in
 
 The runner is a single Python invocation that iterates cadences (firing any whose `next_fire` has elapsed) and then iterates the queue (publishing any item whose `at` has elapsed and `status: pending`). It must run **locally on the user's machine** — Megaphone's whole architecture is local-first and the publish credentials live at `~/.megaphone/credentials/<platform>.json` (chmod 0600). A remote / cloud agent (e.g. `anthropic-skills:schedule`) cannot fire the queue because the credentials don't exist on the remote filesystem, and shipping them to a server defeats the entire local-first premise. **Do not propose cloud schedulers for this runner — every fire would silently fail with `auth_error`.**
 
-#### Recommended: local crontab (macOS / Linux)
-
-Build the line dynamically using the user's actual `python3` path and project root:
+First, resolve the user's actual `python3` path and project root — every install needs absolute paths:
 
 ```bash
 python3 -c 'import sys; print(sys.executable)'
 ```
 
-Then propose this crontab entry (substitute the absolute paths):
+Then pick the platform path. **On macOS, prefer launchd** (more reliable than cron, no Full Disk Access dance). On Linux, use cron. On Windows, Task Scheduler.
+
+#### Recommended on macOS: launchd LaunchAgent
+
+`launchd` is Apple's native scheduler. It runs in the user's login session, doesn't require Full Disk Access for `/usr/sbin/cron`, survives reboot natively, and writes logs to a path you control.
+
+Generate a minimal install script at `<repo>/.megaphone/schedule/install-launchd.sh` that writes a LaunchAgent plist to `~/Library/LaunchAgents/com.megaphone.runner.plist` and loads it via `launchctl load -w`. The plist must use `StartInterval: 900` (15-minute interval), `ProgramArguments` with the absolute python path + runner script + `run-due` + `--cwd <repo>`, and `StandardOutPath` / `StandardErrorPath` pointing at `<repo>/.megaphone/schedule/log.cron`.
+
+Have the user run the script with the `!` prefix:
+
+```
+! sh /absolute/path/to/repo/.megaphone/schedule/install-launchd.sh
+```
+
+The script must be idempotent — if `launchctl list | grep com.megaphone.runner` already finds the agent, unload it first before rewriting the plist (so updates work).
+
+Verify after install:
+
+```
+launchctl list | grep megaphone
+tail -50 <repo>/.megaphone/schedule/log.cron
+```
+
+A status line like `0 0 com.megaphone.runner` means PID 0 (not currently executing) and last exit 0 (last fire succeeded or no fires yet) — both healthy.
+
+To uninstall: `launchctl unload ~/Library/LaunchAgents/com.megaphone.runner.plist && rm ~/Library/LaunchAgents/com.megaphone.runner.plist`.
+
+#### Linux: crontab
 
 ```
 */15 * * * * /absolute/path/to/python3 /absolute/path/to/plugin/skills/megaphone-schedule/scripts/schedule.py run-due --cwd /absolute/path/to/repo >> /absolute/path/to/repo/.megaphone/schedule/log.cron 2>&1
@@ -57,18 +82,24 @@ Then propose this crontab entry (substitute the absolute paths):
 
 Install via:
 ```
-(crontab -l 2>/dev/null; echo 'THE_LINE_ABOVE') | crontab -
+(crontab -l 2>/dev/null; printf '%s\n' 'THE_LINE_ABOVE') | crontab -
 ```
 
-Always show the user the install command and have **them** run it (e.g. via the `!` prefix in Claude Code) — installing a recurring system cron is persistent state and warrants explicit user authorization.
+Generate an install script at `<repo>/.megaphone/schedule/install-cron.sh` rather than asking the user to paste a multi-line crontab line — long lines wrap on paste in many terminals and cron rejects them with "bad minute". The script should `grep -F` for an existing entry and skip if already installed.
 
-On macOS, the user may need to grant **Full Disk Access** to `/usr/sbin/cron` once via System Settings → Privacy & Security → Full Disk Access. Without that, cron will fire but `schedule.py` cannot read repo files.
+Have the user run it with `!`:
 
-To verify after install: `crontab -l` should show the entry, and `tail -50 .megaphone/schedule/log.cron` shows runner output after the first 15-minute tick.
+```
+! sh /absolute/path/to/repo/.megaphone/schedule/install-cron.sh
+```
+
+#### macOS fallback: crontab (only if launchd is blocked)
+
+If for some reason launchd isn't acceptable, the same crontab approach works on macOS, but you must warn the user about the Full Disk Access requirement: the user's terminal **and** `/usr/sbin/cron` may need FDA in System Settings → Privacy & Security → Full Disk Access. Symptoms of missing FDA: `crontab -` returns 0 but `crontab -l` shows the file is empty, or cron fires but the runner can't read repo files. **Recommend launchd unless the user explicitly opts out.**
 
 #### Windows: Task Scheduler
 
-Create a basic task that runs `python3 ...\schedule.py run-due` every 15 minutes with the user's profile context. The python and project paths are absolute, same as Linux/macOS.
+Create a basic task that runs `python3 ...\schedule.py run-due --cwd <repo>` every 15 minutes with the user's profile context. The python and project paths are absolute, same as Linux/macOS.
 
 #### Always-on alternative (only if the user explicitly asks)
 
