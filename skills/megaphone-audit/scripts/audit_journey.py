@@ -127,7 +127,14 @@ def env_vars_required(repo: Path) -> dict:
 
 def first_run_signals(readme: str) -> dict:
     """Look for a runnable example following the install section."""
-    body = read_section(readme, "Usage", "Quick start", "Quickstart", "Getting started", "Example", "Examples")
+    body = read_section(
+        readme,
+        "First run", "First-run",
+        "Usage", "Quick start", "Quickstart",
+        "Getting started", "Get started",
+        "Example", "Examples",
+        "Typical first session", "First session",
+    )
     out = {"section_found": body is not None, "code_block_count": 0, "first_block_preview": None}
     if not body:
         return out
@@ -155,7 +162,7 @@ def return_signals(repo: Path, readme: str) -> dict:
         if (repo / cand).exists():
             out["changelog"] = True
             break
-    if read_section(readme, "What's next", "Going further", "Next steps"):
+    if read_section(readme, "What's next", "Going further", "Next steps", "Roadmap", "What's coming"):
         out["what_next_section"] = True
     if read_section(readme, "Advanced", "Advanced usage"):
         out["advanced_section"] = True
@@ -164,7 +171,18 @@ def return_signals(repo: Path, readme: str) -> dict:
 
 def share_signals(readme: str) -> dict:
     out = {"badges": 0, "share_prompt": False}
-    out["badges"] = len(re.findall(r"!\[[^\]]*\]\(https?://(img\.shields\.io|github\.com)[^)]*\)", readme))
+    # Markdown badge syntax: ![alt](url)
+    md_badges = re.findall(
+        r"!\[[^\]]*\]\(https?://(?:img\.shields\.io|github\.com|api\.codacy\.com|api\.codeclimate\.com|codecov\.io|app\.codacy\.com|circleci\.com|travis-ci\.com|travis-ci\.org)[^)]*\)",
+        readme,
+    )
+    # HTML badge syntax: <img src="https://img.shields.io/..."> — common when README centers badges in a <p>
+    html_badges = re.findall(
+        r'<img[^>]+src=["\']https?://(?:img\.shields\.io|github\.com|api\.codacy\.com|api\.codeclimate\.com|codecov\.io|app\.codacy\.com|circleci\.com|travis-ci\.com|travis-ci\.org)[^"\']*["\'][^>]*>',
+        readme,
+        re.IGNORECASE,
+    )
+    out["badges"] = len(md_badges) + len(html_badges)
     if re.search(r"(if you (like|enjoyed)|star (the|this) repo|share if|please star|consider starring)", readme, re.IGNORECASE):
         out["share_prompt"] = True
     return out

@@ -4,6 +4,15 @@ All notable changes to Megaphone are tracked here. The project follows
 [semantic versioning](https://semver.org/) — minor version bumps add features,
 patch versions fix bugs, breaking changes wait for the next major.
 
+## [0.7.8] — 2026-05-03
+
+### Fixed
+- `megaphone-audit` `audit_journey.py` had three false-negative bugs that under-scored repos by ~20 points:
+  - `first_run_signals` only matched section titles `Usage / Quick start / Quickstart / Getting started / Example / Examples`. Now also matches `First run / First-run / Get started / Typical first session / First session`.
+  - `share_signals` regex only counted Markdown-syntax badges `![](shields.io...)`. READMEs that center badges in `<p>` tags use `<img src=...>` form, which wasn't counted. Now matches both syntaxes and a wider list of badge providers (img.shields.io, github.com, codecov, codacy, codeclimate, circleci, travis-ci).
+  - `return_signals.what_next_section` only matched `What's next / Going further / Next steps`. Now also matches `Roadmap / What's coming` — the more common heading in OSS READMEs.
+- Net effect on Megaphone's own self-audit: 24/70 → 45/70 with no further README work; the bugs were artificially deflating the baseline.
+
 ## [0.7.7] — 2026-05-03
 
 ### Added
@@ -50,6 +59,7 @@ patch versions fix bugs, breaking changes wait for the next major.
 - All skills include the project-resolution preamble — never assume `$HOME` is the project; resolve target via `.git/`, `package.json`, or memory candidates.
 - Standardized launch artifacts under `.megaphone/launch/` (plus `bash hygiene` exit-zero probe rules so first-run errors don't show red blocks).
 
+[0.7.8]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.7...v0.7.8
 [0.7.7]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.6...v0.7.7
 [0.7.6]: https://github.com/fernandoleyra/Megaphone/compare/v0.7.5...v0.7.6
 [0.7.5]: https://github.com/fernandoleyra/Megaphone/compare/abaceca...v0.7.5
