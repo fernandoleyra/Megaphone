@@ -4,6 +4,17 @@ All notable changes to Megaphone are tracked here. The project follows
 [semantic versioning](https://semver.org/) — minor version bumps add features,
 patch versions fix bugs, breaking changes wait for the next major.
 
+## [1.0.0] — 2026-06-25
+
+### Changed
+- Version 1.0.0: first stable marketplace release.
+- Purged committed `node_modules` from `.megaphone/assets/demo/remotion/` — repo size reduced significantly.
+- Completed `plugin.json` and `marketplace.json` with full metadata (version, license, repository, engines, skills list, keywords).
+- Added `UPLOAD.md` with step-by-step publication instructions.
+
+### Fixed
+- `.gitignore` now excludes `remotion/node_modules/`, `.cache/`, `*.DS_Store`, and screen recordings.
+
 ## [0.7.9] — 2026-05-03
 
 ### Fixed
