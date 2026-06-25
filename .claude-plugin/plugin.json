@@ -1,10 +1,14 @@
 {
   "name": "megaphone",
-  "version": "0.7.9",
-  "description": "Local-first launch-orchestration toolkit for vibe coders. Nine focused skills + six slash commands - init the project profile, generate copy/banner/demo assets, draft community-aware posts (Reddit per-sub, Show HN, Indie Hackers, Peerlist, Hashnode + feed platforms), run outreach (venues, amplifiers, personalized DMs, 30/14/6/0-day launch plan), publish locally to 7 platforms, schedule one-offs/cadences/launch sequences, audit the landing page and user journey, and track traction. No SaaS in the middle.",
+  "version": "1.0.0",
+  "description": "Local-first launch-orchestration toolkit for indie & vibe coders. Nine focused skills + six slash commands — init the project profile, generate copy/banner/demo assets, draft community-aware posts (Reddit per-sub, Show HN, Indie Hackers, Peerlist, Hashnode + feed platforms), run outreach (venues, amplifiers, personalized DMs, 30/14/6/0-day launch plan), publish locally to 7 platforms, schedule launch sequences, audit the landing page, and track traction. No SaaS in the middle.",
   "author": {
-    "name": "Fernando Leyra"
+    "name": "Fernando Leyra",
+    "email": "fernando@family.agency"
   },
+  "license": "MIT",
+  "repository": "https://github.com/fernandoleyra/megaphone",
+  "homepage": "https://github.com/fernandoleyra/megaphone#readme",
   "keywords": [
     "marketing",
     "launch",
@@ -12,6 +16,29 @@
     "build-in-public",
     "indie-hacker",
     "vibe-coding",
+    "social-media",
     "github-stars"
+  ],
+  "engines": {
+    "claude-code": ">=1.0.0"
+  },
+  "skills": [
+    "skills/megaphone-init",
+    "skills/megaphone-post",
+    "skills/megaphone-publish",
+    "skills/megaphone-schedule",
+    "skills/megaphone-audit",
+    "skills/megaphone-assets",
+    "skills/megaphone-demo",
+    "skills/megaphone-digest",
+    "skills/megaphone-outreach"
+  ],
+  "commands": [
+    "commands/init.md",
+    "commands/post.md",
+    "commands/publish.md",
+    "commands/schedule.md",
+    "commands/audit.md",
+    "commands/digest.md"
   ]
 }
