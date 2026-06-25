@@ -26,3 +26,10 @@ build/
 
 # Local Claude Code state (ralph-loop, hooks, scratch)
 .claude/
+
+# Runtime artifacts
+.megaphone/assets/demo/remotion/node_modules/
+.megaphone/assets/demo/remotion/.cache/
+*.DS_Store
+screenshots/*.mov
+screenshots/*.mp4
